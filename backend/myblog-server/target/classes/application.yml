@@ -1,0 +1,96 @@
+server:
+  port: 8088
+# application.yml
+logging:
+  level:
+    # 核心：开启 Spring Security 调试日志（会打印权限校验的全过程）
+    org.springframework.security: DEBUG
+    # 可选：开启 WebSocket 安全日志（排查 STOMP 订阅 403）
+    org.springframework.security.messaging: DEBUG
+    # 可选：开启 WebSocket 核心日志
+
+    org.springframework.messaging.simp: DEBUG
+    org.springframework.web.socket: DEBUG
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: minioadmin # 登录minio的账户名
+  secret-key: minioadmin # 登录minio的密码
+  bucket-name: my-bucket  # 使用的存储桶（Bucket）名称。
+forum:
+  hot:
+    post:
+      access-10min: 30 # 算作热点帖子的10分钟访问量
+      access-1h: 100 # 算作热点帖子的1小时分钟访问量
+rocketmq:
+  name-server: 172.19.233.77:9876  # 仅保留这个地址
+  producer:
+    group: like-db-producer-sync-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+  consumer:
+    group: like-db-consumer-sync-group
+    consume-thread-max: 20
+    consume-message-batch-max-size: 1
+spring:
+
+  websocket:
+    stomp:
+      # 启用STOMP协议
+      enabled: true
+      # 消息代理配置（对应代码中的enableSimpleBroker）
+      broker-relay:
+        # 内置消息代理（无需外部MQ，本地即可）
+        simple-broker: /topic, /queue
+        # 用户点对点消息前缀（对应代码中的setUserDestinationPrefix）
+        user-destination-prefix: /user
+        # 应用前缀（对应代码中的setApplicationDestinationPrefixes）
+        application-destination-prefixes: /app
+    # ========== 新增：跨域配置（解决前端连接跨域问题） ==========
+    cors:
+  cloud:
+    sentinel:
+      transport:
+        # Sentinel 控制台的地址（IP+端口）
+        dashboard: localhost:8858
+        # 客户端和控制台通信的端口（默认 8719，若被占用可改）
+        port: 8719
+      # 取消控制台懒加载，启动后就注册（可选）
+      eager: true
+  jwt:
+    # 签发人
+    issuer: yry
+    # 秘钥
+    secret: gR6cytlUlgMfVh08nLFZf8hMk4mmcpX5rWBVlkgnsprlWcLwNRU6+rIPcLx21x191kJgP8udtoZuHt5yUDWtgg==
+    # token 过期时间（单位：毫秒）
+    tokenExpireTime: 3600000
+    # refreshToken 过期时间（单位：毫秒）
+    refreshExpireTime: 360000000
+    # token Header 中的 key 值
+    tokenHeaderKey: Authorization
+    # token Header 中的 value 值前缀
+    tokenPrefix: Bearer
+  security:
+    user:
+      name: myadmin  # 自定义用户名
+      password: "{noop}admin123"  # 自定义密码
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/myblog?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123456
+  data:
+    data:
+      elasticsearch:
+        client:
+          rest:
+            uris: http://localhost:9200  # WSL的ES地址
+#            username: elastic           # ES的默认管理员账号
+#            password: 123456            # 启动ES时设置的密码
+        repositories:
+          enabled: true
+    redis:
+      host: localhost
+      port: 6379
+      password: 1736312974
+      timeout: 2000ms

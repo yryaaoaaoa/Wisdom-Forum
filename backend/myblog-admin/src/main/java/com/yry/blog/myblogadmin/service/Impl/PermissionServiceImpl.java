@@ -1,0 +1,105 @@
+package com.yry.blog.myblogadmin.service.Impl;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yry.blog.myblogadmin.service.PermissionService;
+import com.yry.blog.myblogcommon.entity.Permission.Permission;
+import com.yry.blog.myblogadmin.mapper.PermissionMapper;
+import com.yry.blog.myblogadmin.mapper.RoleMapper;
+import com.yry.blog.myblogadmin.mapper.UserMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+/**
+ * 权限服务实现类
+ */
+@Service
+public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permission> implements PermissionService {
+
+    @Autowired
+    private UserMapper userMapper;
+
+    @Autowired
+    private RoleMapper roleMapper;
+
+    @Autowired
+    private PermissionMapper permissionMapper;
+
+    @Override
+    public List<String> getPermissionCodesByUserId(Long userId) {
+        // 先获取用户的角色ID列表
+        List<Long> roleIds = getUserRoleIds(userId);
+
+        // 根据角色ID列表获取权限列表
+        List<Permission> code = getPermissionsByRoleIds(roleIds);
+
+        // 提取权限码
+        return code.stream()
+                .map(Permission::getCode)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 获取用户的角色ID列表
+     * @param userId 用户ID
+     * @return 角色ID列表
+     */
+    private List<Long> getUserRoleIds(Long userId) {
+        // 查询user_role表获取用户的角色ID列表
+        return userMapper.selectRoleIdsByUserId(userId);
+    }
+
+    @Override
+    public List<Permission> getPermissionsByRoleId(Long roleId) {
+        List<Long> roleIds = new ArrayList<>();
+        roleIds.add(roleId);
+        return getPermissionsByRoleIds(roleIds);
+    }
+
+    @Override
+    public List<Permission> getPermissionsByRoleIds(List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return roleMapper.selectPermissionsByRoleIds(roleIds);
+    }
+
+    @Override
+    public List<Permission> getAllPermissions() {
+        // 查询permission表获取所有权限
+        return permissionMapper.selectList(new QueryWrapper<>());
+    }
+
+    @Override
+    public Permission getPermissionById(Long id) {
+        // 根据权限ID获取权限
+        return permissionMapper.selectById(id);
+    }
+
+    @Override
+    public Permission createPermission(Permission permission) {
+        // 向permission表插入新权限
+        permissionMapper.insert(permission);
+        return permission;
+    }
+
+    @Override
+    public Permission updatePermission(Permission permission) {
+        // 更新permission表中的权限信息
+        permissionMapper.updateById(permission);
+        return permission;
+    }
+
+    @Override
+    public void deletePermission(Long id) {
+        // 从permission表删除指定ID的权限
+        permissionMapper.deleteById(id);
+        // 同时还需要删除role_permission表中的相关记录
+        // 这里可以添加删除关联记录的逻辑
+    }
+}

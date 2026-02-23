@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 继承父模块 -->
+    <parent>
+        <groupId>com.yry.blog</groupId>
+        <artifactId>myblog-parent</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath> <!-- 父模块在上级目录 -->
+    </parent>
+
+    <!-- 模块基本信息 -->
+    <packaging>jar</packaging>
+    <artifactId>myblog-server</artifactId>
+    <name>myblog-server</name>
+    <description>MyBlog 项目的启动模块</description>
+
+    <!-- 仓库配置（顶级元素） -->
+    <repositories>
+        <repository>
+            <id>aliyunmaven</id>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </repository>
+    </repositories>
+
+    <!-- 插件仓库（修正语法错误：移除多余的 pluginRepositories 嵌套） -->
+    <pluginRepositories>
+        <pluginRepository>
+            <id>aliyunmaven</id>
+            <url>https://maven.aliyun.com/repository/public</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <!-- 依赖配置：省略版本号（父模块已管理） -->
+    <dependencies>
+        <dependency>
+            <groupId>com.yry.blog</groupId>
+            <artifactId>myblog-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.yry.blog</groupId>
+            <artifactId>myblog-admin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.yry.blog</groupId>
+            <artifactId>myblog-article</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.yry.blog</groupId>
+            <artifactId>myblog-websocket</artifactId>
+        </dependency>
+
+
+        <!-- Spring Cloud Alibaba Sentinel -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
+
+        <!-- Spring Boot 核心启动依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+    </dependencies>
+
+    <!-- 构建配置 -->
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
+                <configuration>
+                    <!-- 替换为你实际的启动类全路径 -->
+                    <mainClass>com.yry.blog.MyBlogServerApplication</mainClass>
+                    <layout>JAR</layout>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>repackage</id>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

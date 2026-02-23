@@ -1,0 +1,21 @@
+server:
+  port: 8088
+cors:
+  allowed-origins: "*"
+spring:
+  jwt:
+    secret: placeholder
+  datasource:
+    url: jdbc:mysql://localhost:3306/myblog
+    username: root
+    password: placeholder
+  data:
+    redis:
+      password: placeholder
+  mail:
+    username: placeholder@mail.com
+    password: placeholder
+elasticsearch:
+  password: placeholder
+app:
+  name: placeholder
