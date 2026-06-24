@@ -20,8 +20,8 @@
         <module name="myblog-server" />
         <module name="myblog-websocket" />
         <module name="myblog-admin" />
-        <module name="myblog-article" />
         <module name="myblog-common" />
+        <module name="myblog-article" />
       </profile>
     </annotationProcessing>
   </component>

@@ -1,6 +1,7 @@
 package com.yry.blog.myblogwebsocket.config;
 
 import com.yry.blog.myblogadmin.jwt.JwtUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -18,6 +19,7 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import java.util.List;
 
+@Slf4j
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
@@ -73,21 +75,21 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                                 Authentication auth = new UsernamePasswordAuthenticationToken(userId, null, List.of());
                                 SecurityContextHolder.getContext().setAuthentication(auth);
                                 accessor.setUser(auth);
-                                System.out.println("✅ STOMP CONNECT成功，用户ID：" + userId);
+                                log.debug("STOMP CONNECT成功，用户ID：{}", userId);
                             } else {
                                 // Token无效，拒绝连接
                                 accessor.setLeaveMutable(true);
-                                System.out.println("❌ Token无效，用户ID为空");
+                                log.warn("Token无效，用户ID为空");
                             }
                         } catch (Exception e) {
                             // Token解析失败，拒绝连接
                             accessor.setLeaveMutable(true);
-                            System.out.println("❌ Token验证失败：" + e.getMessage());
+                            log.warn("Token验证失败：{}", e.getMessage());
                         }
                     } else {
                         // 未携带Token，拒绝连接
                         accessor.setLeaveMutable(true);
-                        System.out.println("❌ 未携带Authorization Token");
+                        log.warn("未携带Authorization Token");
                     }
                 }
                 return message;

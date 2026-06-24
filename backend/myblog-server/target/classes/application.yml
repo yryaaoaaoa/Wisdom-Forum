@@ -1,5 +1,9 @@
 server:
   port: 8088
+
+cors:
+  allowed-origins: "*"
+
 # application.yml
 logging:
   level:
@@ -8,9 +12,9 @@ logging:
     # 可选：开启 WebSocket 安全日志（排查 STOMP 订阅 403）
     org.springframework.security.messaging: DEBUG
     # 可选：开启 WebSocket 核心日志
-
     org.springframework.messaging.simp: DEBUG
     org.springframework.web.socket: DEBUG
+    com.yry.blog.myblogcommon.config.SqlTimeInterceptor: DEBUG
 
 minio:
   endpoint: http://localhost:9000
@@ -33,7 +37,10 @@ rocketmq:
     consume-thread-max: 20
     consume-message-batch-max-size: 1
 spring:
-
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
   websocket:
     stomp:
       # 启用STOMP协议
@@ -46,8 +53,6 @@ spring:
         user-destination-prefix: /user
         # 应用前缀（对应代码中的setApplicationDestinationPrefixes）
         application-destination-prefixes: /app
-    # ========== 新增：跨域配置（解决前端连接跨域问题） ==========
-    cors:
   cloud:
     sentinel:
       transport:
@@ -80,13 +85,10 @@ spring:
     username: root
     password: 123456
   data:
-    data:
-      elasticsearch:
+    elasticsearch:
         client:
           rest:
-            uris: http://localhost:9200  # WSL的ES地址
-#            username: elastic           # ES的默认管理员账号
-#            password: 123456            # 启动ES时设置的密码
+            uris: http://localhost:9200
         repositories:
           enabled: true
     redis:
@@ -94,3 +96,29 @@ spring:
       port: 6379
       password: 1736312974
       timeout: 2000ms
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: 1736312974@qq.com
+    password: yvustyqjhgpbehae
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+app:
+  name: 智汇论坛
+  password-reset-url: http://localhost:5173/reset-password
+
+elasticsearch:
+  enabled: true
+  host: localhost
+  port: 9200
+  scheme: https
+  username: elastic
+  password: zisqvAJfc6duu5suChU5
+  connection-timeout: 5000
+  socket-timeout: 30000

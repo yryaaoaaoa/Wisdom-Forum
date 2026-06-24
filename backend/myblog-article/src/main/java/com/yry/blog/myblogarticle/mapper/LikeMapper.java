@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface LikeMapper extends BaseMapper<Like> {
@@ -25,4 +26,7 @@ public interface LikeMapper extends BaseMapper<Like> {
             @Param("targetId") Long targetId,
             @Param("likeType") Integer likeType
     );
+
+    @Select("SELECT COALESCE(COUNT(*), 0) FROM likes WHERE like_type = #{likeType}")
+    Long selectTotalLikeCountByType(@Param("likeType") Integer likeType);
 }

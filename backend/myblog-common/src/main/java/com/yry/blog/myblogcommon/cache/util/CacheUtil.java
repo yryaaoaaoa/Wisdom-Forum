@@ -88,7 +88,6 @@ public class CacheUtil {
         try {
             // 2. 第一步：批量查本地缓存（返回Map<key, value>）
             Map<String, Object> localHitMap = localCacheManager.multiGet(keys);
-            localCacheManager.printAllCacheContent();
             // 存储最终结果（保证顺序）
             Map<String, T> resultMap = new HashMap<>(keys.size());
 

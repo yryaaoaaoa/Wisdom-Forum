@@ -16,13 +16,16 @@ public class ArticleVO {
     private Long id;
     private Long authId;
     private String authName;
+    private String authAvatar;
     private String title;
     private String summary;
     private String coverUrl;
     private String content;
-    private Integer status; // 或使用枚举类
+    private Integer status;
     private Integer readCount;
     private Long likeCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private Long categoryId;
+    private String categoryName;
 }

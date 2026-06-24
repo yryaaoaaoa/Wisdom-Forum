@@ -80,8 +80,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <!-- 替换为你实际的启动类全路径 -->
-                    <mainClass>com.yry.blog.MyBlogServerApplication</mainClass>
+                    <mainClass>com.yry.blog.MyblogServerApplication</mainClass>
                     <layout>JAR</layout>
                 </configuration>
                 <executions>

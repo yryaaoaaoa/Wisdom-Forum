@@ -6,17 +6,16 @@ import com.yry.blog.myblogadmin.service.PermissionService;
 import com.yry.blog.myblogcommon.entity.Permission.Permission;
 import com.yry.blog.myblogadmin.mapper.PermissionMapper;
 import com.yry.blog.myblogadmin.mapper.RoleMapper;
+import com.yry.blog.myblogadmin.mapper.RolePermissionMapper;
 import com.yry.blog.myblogadmin.mapper.UserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 权限服务实现类
- */
 @Service
 public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permission> implements PermissionService {
 
@@ -28,6 +27,9 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
 
     @Autowired
     private PermissionMapper permissionMapper;
+
+    @Autowired
+    private RolePermissionMapper rolePermissionMapper;
 
     @Override
     public List<String> getPermissionCodesByUserId(Long userId) {
@@ -96,10 +98,9 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     }
 
     @Override
+    @Transactional
     public void deletePermission(Long id) {
-        // 从permission表删除指定ID的权限
+        rolePermissionMapper.deleteByPermissionId(id);
         permissionMapper.deleteById(id);
-        // 同时还需要删除role_permission表中的相关记录
-        // 这里可以添加删除关联记录的逻辑
     }
 }

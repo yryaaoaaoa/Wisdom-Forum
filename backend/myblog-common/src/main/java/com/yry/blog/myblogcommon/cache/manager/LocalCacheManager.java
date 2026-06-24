@@ -276,29 +276,8 @@ public class LocalCacheManager {
      * 获取默认降级数据（根据业务定制）
      */
     private Object getDefaultDegradeData(String key) {
-        // 示例：热门帖子返回固定默认数据
-        if (key.startsWith("post:hot:")) {
-            return "[{id:1001, title:'热门帖子默认标题'}]";
-        }
+        // 返回 null，由调用方决定如何处理降级情况
+        log.warn("缓存降级：key:{} 无可用降级数据", key);
         return null;
-    }
-    // 工具类中新增方法：打印所有缓存内容
-    public void printAllCacheContent() {
-        // asMap()返回缓存的线程安全视图，遍历不会阻塞其他操作
-        Map<String, Object> cacheMap = normalCache.asMap();
-        if (cacheMap.isEmpty()) {
-            System.out.println("Caffeine缓存为空");
-            return;
-        }
-        System.out.println("=== Caffeine缓存内容 ===");
-        System.out.println("缓存总条数：" + cacheMap.size());
-        for (Map.Entry<String, Object> entry : cacheMap.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            // 针对你的分页场景，可过滤文章缓存键
-            if (key.startsWith(CacheConstants.CACHE_PREFIX_ARTICLE)) {
-                System.out.printf("Key: %s, Value: %s%n", key, value);
-            }
-        }
     }
 }

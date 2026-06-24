@@ -8,17 +8,16 @@
 
     <el-table :data="users" border style="width: 100%">
       <el-table-column prop="id" label="ID" width="80" />
-      <el-table-column prop="username" label="账号" width="150" />
+      <el-table-column prop="username" label="账号" width="160" />
       <el-table-column prop="nickname" label="用户名" width="150" />
-      <el-table-column prop="avatar_url" label="头像" width="120"/>
-      <el-table-column prop="email" label="邮箱" width="200" />
-      <el-table-column prop="role" label="角色" width="120">
+      <el-table-column label="头像" width="80">
         <template #default="scope">
-          <el-tag :type="scope.row.role === 'admin' ? 'danger' : 'primary'">
-            {{ scope.row.role }}
-          </el-tag>
+          <el-avatar :size="40" :src="getAvatarUrl(scope.row.avatarUrl)">
+            <el-icon><User /></el-icon>
+          </el-avatar>
         </template>
       </el-table-column>
+      <el-table-column prop="email" label="邮箱" width="200" />
       <el-table-column prop="status" label="状态" width="100">
         <template #default="scope">
           <el-tag :type="scope.row.status === 'active' ? 'success' : 'warning'">
@@ -26,6 +25,7 @@
           </el-tag>
         </template>
       </el-table-column>
+      <el-table-column prop="roleName" label="角色" width="150" />
       <el-table-column prop="createdAt" label="创建时间" width="180" />
 
       <el-table-column label="操作" width="200">
@@ -71,12 +71,6 @@
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="currentUser.email" />
         </el-form-item>
-        <el-form-item label="角色" prop="role">
-          <el-select v-model="currentUser.role" style="width: 100%">
-            <el-option label="管理员" value="admin" />
-            <el-option label="普通用户" value="user" />
-          </el-select>
-        </el-form-item>
         <el-form-item label="状态" prop="status">
           <el-switch
               v-model="currentUser.status"
@@ -86,6 +80,16 @@
         </el-form-item>
         <el-form-item v-if="!isEdit" label="密码" prop="password">
           <el-input v-model="currentUser.password" type="password" show-password />
+        </el-form-item>
+        <el-form-item label="角色" prop="role">
+          <el-select v-model="currentUser.role" placeholder="请选择角色" style="width: 100%">
+            <el-option
+              v-for="role in roles"
+              :key="role.id"
+              :label="role.roleName"
+              :value="role.roleName"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -100,8 +104,23 @@
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { User } from '@element-plus/icons-vue'
 import { getUsers, createUser, updateUser, deleteUser } from '@/api/user/user.js'
+import request from '@/utils/requests'
+import { getAvatarUrl } from '@/utils/avatar.js'
+
+const roles = ref([])
+
+const fetchRoles = async () => {
+  try {
+    const res = await request({ url: '/api/roles', method: 'get' })
+    if (res.data.code === 200) {
+      roles.value = res.data.data || []
+    }
+  } catch (error) {
+    console.error('获取角色列表失败:', error)
+  }
+}
 
 // 用户数据
 const users = ref([])
@@ -165,7 +184,11 @@ const fetchUsers = async () => {
 
     const response = await getUsers(params)
 
-    if (response.data.data && response.data.data.records) {
+    if (response.data.code !== 200) {
+      ElMessage.error(response.data.msg || '获取用户列表失败')
+      users.value = []
+      total.value = 0
+    } else if (response.data.data && response.data.data.records) {
       console.log(response.data.data.records)
       users.value = response.data.data.records.map(user => ({
         ...user,
@@ -178,7 +201,7 @@ const fetchUsers = async () => {
       total.value = 0
     }
   } catch (error) {
-    ElMessage.error('获取用户列表失败')
+    ElMessage.error(error.response?.data?.msg || '获取用户列表失败')
     console.error(error)
   } finally {
     loading.value = false
@@ -201,7 +224,7 @@ const handleEdit = (row) => {
     id: row.id,
     username: row.username,
     email: row.email,
-    role: row.role,
+    role: row.roleName || 'ROLE_USER',
     status: row.status,
     nickname: row.nickname || row.username
     // 注意：不复制 password
@@ -225,7 +248,7 @@ const handleDelete = (row) => {
       ElMessage.success('删除成功')
       fetchUsers()
     } catch (error) {
-      ElMessage.error('删除失败')
+      ElMessage.error(error.response?.data?.msg || '删除失败')
       console.error(error)
     }
   }).catch(() => {
@@ -239,22 +262,22 @@ const submitForm = () => {
     if (valid) {
       submitLoading.value = true
       try {
-        const userData = {
-          username: currentUser.username,
-          nickname: currentUser.nickname || currentUser.username,
-          email: currentUser.email,
-          role: currentUser.role,
-          enabled: currentUser.status === 'active' ? 1 : 0
-        }
-
-        if (!isEdit.value) {
-          userData.password = currentUser.password
-        }
-
         if (isEdit.value) {
+          const userData = {
+            nickname: currentUser.nickname || currentUser.username,
+            email: currentUser.email,
+            enabled: currentUser.status === 'active',
+            roles: currentUser.role ? [currentUser.role] : []
+          }
           await updateUser(currentUser.id, userData)
           ElMessage.success('更新成功')
         } else {
+          const userData = {
+            username: currentUser.username,
+            nickname: currentUser.nickname || currentUser.username,
+            email: currentUser.email,
+            password: currentUser.password
+          }
           await createUser(userData)
           ElMessage.success('添加成功')
         }
@@ -262,7 +285,7 @@ const submitForm = () => {
         dialogVisible.value = false
         fetchUsers()
       } catch (error) {
-        ElMessage.error(isEdit.value ? '更新失败' : '添加失败')
+        ElMessage.error(error.response?.data?.msg || (isEdit.value ? '更新失败' : '添加失败'))
         console.error(error)
       } finally {
         submitLoading.value = false
@@ -297,6 +320,7 @@ const handleCurrentChange = (val) => {
 
 onMounted(() => {
   fetchUsers()
+  fetchRoles()
 })
 </script>
 

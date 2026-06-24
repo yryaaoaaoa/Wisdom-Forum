@@ -1,13 +1,12 @@
 package com.yry.blog.myblogcommon.entity.UserRole;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 /**
  * 用户角色关联实体类
@@ -37,5 +36,6 @@ public class UserRole {
     /**
      * 创建时间
      */
-    private Long createTime;
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
 }

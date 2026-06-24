@@ -29,6 +29,12 @@ public class CacheConstants {
 
     /** 文章模块缓存前缀 */
     public static final String CACHE_PREFIX_ARTICLE = "forum:article";
+    
+    /** 文章列表缓存前缀（不含content） */
+    public static final String CACHE_PREFIX_ARTICLE_LIST = "forum:article:list";
+    
+    /** 文章详情缓存前缀（含content） */
+    public static final String CACHE_PREFIX_ARTICLE_DETAIL = "forum:article:detail";
 
     /** 用户模块缓存前缀 */
     public static final String CACHE_PREFIX_USER = "user";

@@ -3,57 +3,47 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "dev": "vite",
+    "serve": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
-    "@vueup/vue-quill": "^1.2.0",
     "axios": "^1.11.0",
-    "core-js": "^3.8.3",
     "element-plus": "^2.11.5",
-    "path-browserify": "^1.0.1",
+    "md-editor-v3": "^4.18.1",
     "pinia": "^3.0.3",
-    "quill": "^2.0.3",
-    "quill-markdown": "^2.1.2",
-    "vue": "^3.2.13",
-    "vue-quill-editor": "^3.0.6",
-    "vue-router": "^4.6.3",
-    "vuex": "^4.0.2"
+    "vue": "^3.5.33",
+    "vue-router": "^4.6.3"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
-    "@vue/cli-plugin-babel": "~5.0.0",
-    "@vue/cli-plugin-eslint": "~5.0.0",
-    "@vue/cli-service": "~5.0.0",
+    "@vitejs/plugin-vue": "^6.0.7",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "sass": "^1.93.2",
-    "sass-loader": "^16.0.5",
+    "sass-embedded": "^1.100.0",
     "unplugin-auto-import": "^20.2.0",
     "unplugin-vue-components": "^29.1.0",
+    "vite": "^5.4.21",
     "vue-eslint-parser": "^10.2.0"
   },
   "eslintConfig": {
     "root": true,
     "env": {
-      "node": true
+      "node": true,
+      "es2021": true
     },
     "extends": [
       "plugin:vue/vue3-essential",
       "eslint:recommended"
     ],
-    "parserOptions": {},
+    "parserOptions": {
+      "ecmaVersion": 12,
+      "sourceType": "module"
+    },
     "rules": {
       "vue/multi-word-component-names": "off"
     }
-  },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not dead",
-    "not ie 11"
-  ]
+  }
 }

@@ -30,7 +30,6 @@ public class PermissionAspect {
     public void checkPermission(JoinPoint joinPoint, RequiresPermission requiresPermission) {
         // 1. 从 Spring Security 上下文获取当前已认证的用户信息
         Collection<? extends GrantedAuthority> authorities = getGrantedAuthorities();
-        System.out.println(authorities);
         List<String> userPermissions = authorities.stream()
                 .map(GrantedAuthority::getAuthority) // 获取权限字符串
                 .toList();

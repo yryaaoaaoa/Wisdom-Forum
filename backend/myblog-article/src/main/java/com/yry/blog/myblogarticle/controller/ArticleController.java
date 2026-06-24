@@ -1,21 +1,30 @@
 package com.yry.blog.myblogarticle.controller;
 
+import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.yry.blog.myblogarticle.dto.AddCommentDTO;
 import com.yry.blog.myblogarticle.dto.ArticleQueryDTO;
 import com.yry.blog.myblogarticle.dto.ArticleUpdateDTO;
 import com.yry.blog.myblogarticle.dto.DeleteCommentDTO;
+import com.yry.blog.myblogarticle.elasticsearch.ArticleDocument;
+import com.yry.blog.myblogarticle.elasticsearch.ArticleSearchDTO;
+import com.yry.blog.myblogarticle.elasticsearch.ArticleSearchServiceImpl;
+import com.yry.blog.myblogarticle.elasticsearch.HotArticleService;
 import com.yry.blog.myblogarticle.service.ArticleService;
 import com.yry.blog.myblogarticle.service.CommentService;
 import com.yry.blog.myblogarticle.service.LikeService;
 import com.yry.blog.myblogarticle.vo.ArticleVO;
+import com.yry.blog.myblogarticle.vo.StatsVO;
 import com.yry.blog.myblogarticle.vo.CommentVO;
 import com.yry.blog.myblogcommon.entity.article.Article;
 import com.yry.blog.myblogcommon.result.PaginationResponse;
 import com.yry.blog.myblogcommon.result.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 文章模块控制器
@@ -24,6 +33,7 @@ import java.util.List;
  * @date （可补充创建日期）
  */
 @RestController
+@Controller
 @RequestMapping("/api/articles")
 public class ArticleController {
 
@@ -45,14 +55,21 @@ public class ArticleController {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private ArticleSearchServiceImpl searchService;
+
+    @Autowired
+    private HotArticleService hotArticleService;
+
     /**
      * 发布文章接口
      * 将草稿状态的文章发布为正式文章
      * @param articleId 文章ID
      */
     @PostMapping("/publish")
-    public void publishArticle(@RequestBody Long articleId){
+    public Response<Object> publishArticle(@RequestParam Long articleId){
         articleService.publishArticle(articleId);
+        return Response.success(null);
     }
 
     /**
@@ -73,8 +90,8 @@ public class ArticleController {
      * @param articleId 文章ID
      * @return Response<Object> 响应结果，返回删除操作的执行状态
      */
-    @DeleteMapping("/delete")
-    public Response<Object> deleteArticle(@RequestBody Long articleId) {
+    @DeleteMapping("/delete/{articleId}")
+    public Response<Object> deleteArticle(@PathVariable Long articleId) {
         return articleService.deleteArticle(articleId);
     }
 
@@ -94,7 +111,7 @@ public class ArticleController {
      * @return Response<Article> 响应结果，包含文章完整实体信息
      */
     @GetMapping("/get")
-    public Response<Article> getArticleById(Long id) {
+    public Response<Article> getArticleById(@RequestParam Long id) {
         return articleService.getArticleById(id);
     }
 
@@ -116,7 +133,7 @@ public class ArticleController {
      * @return Response<List<CommentVO>> 响应结果，包含该文章的评论VO列表
      */
     @GetMapping("/comment/view")
-    public Response<List<CommentVO>> commentArticle(Long articleId) {
+    public Response<List<CommentVO>> commentArticle(@RequestParam Long articleId) {
         return commentService.getArticleComments(articleId);
     }
 
@@ -126,8 +143,9 @@ public class ArticleController {
      * @param commentDTO 评论数据传输对象，包含文章ID、评论内容、评论人等信息
      */
     @PostMapping("/comment/add")
-    public void addComment(@RequestBody AddCommentDTO commentDTO) {
+    public Response<Object> addComment(@RequestBody AddCommentDTO commentDTO) {
         commentService.addComment(commentDTO);
+        return Response.success(null);
     }
 
     /**
@@ -136,8 +154,9 @@ public class ArticleController {
      * @param commentDTO 评论删除数据传输对象，包含要删除的评论ID
      */
     @PostMapping("/comment/delete")
-    public void deleteComment(@RequestBody DeleteCommentDTO commentDTO) {
+    public Response<Object> deleteComment(@RequestBody DeleteCommentDTO commentDTO) {
         commentService.deleteComment(commentDTO.getId());
+        return Response.success(null);
     }
 
     /**
@@ -148,7 +167,132 @@ public class ArticleController {
      * @return boolean 操作结果：true-点赞成功，false-取消点赞成功
      */
     @PostMapping("/like")
-    public boolean like(Long targetId, Integer likeType){
-        return likeService.like(targetId, likeType);
+    public Response<Boolean> like(@RequestParam Long targetId, @RequestParam Integer likeType){
+        return Response.success(likeService.like(targetId, likeType));
+    }
+
+    /**
+     * 获取点赞数接口
+     * @param targetId 目标ID（文章ID或评论ID）
+     * @param likeType 点赞类型（1-文章，2-评论）
+     * @return 点赞数
+     */
+    @GetMapping("/like/count")
+    public Response<Long> getLikeCount(@RequestParam Long targetId, @RequestParam Integer likeType) {
+        return Response.success(likeService.getLikeCount(targetId, likeType));
+    }
+
+    /**
+     * 检查用户是否已点赞接口
+     * @param targetId 目标ID（文章ID或评论ID）
+     * @param likeType 点赞类型（1-文章，2-评论）
+     * @return 是否已点赞
+     */
+    @GetMapping("/like/status")
+    public Response<Boolean> hasLiked(@RequestParam Long targetId, @RequestParam Integer likeType) {
+        return Response.success(likeService.hasLiked(targetId, likeType));
+    }
+
+    /**
+     * 获取博客统计数据接口
+     * @return Response<StatsVO> 响应结果，包含文章数、分类数、总阅读量、总点赞数
+     */
+    @GetMapping("/stats")
+    public Response<StatsVO> getStats() {
+        return articleService.getStats();
+    }
+
+    /**
+     * 获取热门文章列表接口
+     * @param limit 返回数量限制，默认5篇
+     * @return Response<List<ArticleVO>> 响应结果，包含热门文章列表
+     */
+    @GetMapping("/hot")
+    public Response<List<ArticleVO>> getHotArticles(@RequestParam(defaultValue = "5") Integer limit) {
+        return articleService.getHotArticles(limit);
+    }
+
+    @GetMapping("/related/{articleId}")
+    public Response<List<ArticleVO>> getRelatedArticles(
+            @PathVariable Long articleId,
+            @RequestParam(defaultValue = "5") Integer limit) {
+        return articleService.getRelatedArticles(articleId, limit);
+    }
+
+    @GetMapping("/search")
+    public Response<Map<String, Object>> search(
+        @RequestParam String keyword,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        SearchResponse<ArticleDocument> response = searchService.search(keyword, page, size);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", searchService.extractSearchResults(response));
+        result.put("total", searchService.getTotalHits(response));
+        result.put("page", page);
+        result.put("size", size);
+        
+        return Response.success(result);
+    }
+
+    @PostMapping("/search/advanced")
+    public Response<Map<String, Object>> advancedSearch(@RequestBody ArticleSearchDTO searchDTO) {
+        SearchResponse<ArticleDocument> response = searchService.advancedSearch(searchDTO);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", searchService.extractSearchResults(response));
+        result.put("total", searchService.getTotalHits(response));
+        result.put("page", searchDTO.getPage());
+        result.put("size", searchDTO.getSize());
+        
+        return Response.success(result);
+    }
+
+    @GetMapping("/hot/es")
+    public Response<Map<String, Object>> getHotArticlesByES(
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        SearchResponse<ArticleDocument> response = hotArticleService.getHotArticles(page, size);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", hotArticleService.extractResults(response));
+        result.put("total", hotArticleService.getTotalHits(response));
+        result.put("page", page);
+        result.put("size", size);
+        
+        return Response.success(result);
+    }
+
+    @PostMapping("/reindex")
+    public Response<Object> reindexAll() {
+        return articleService.reindexAllToES();
+    }
+
+    @GetMapping("/trending")
+    public Response<List<Map<String, Object>>> getTrendingArticles(
+        @RequestParam(defaultValue = "24") int hours,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        SearchResponse<ArticleDocument> response = hotArticleService.getTrendingArticles(hours, size);
+        return Response.success(hotArticleService.extractResults(response));
+    }
+
+    @GetMapping("/search/relevance")
+    public Response<Map<String, Object>> searchWithRelevance(
+        @RequestParam String keyword,
+        @RequestParam(defaultValue = "1") int page,
+        @RequestParam(defaultValue = "10") int size
+    ) {
+        SearchResponse<ArticleDocument> response = hotArticleService.searchWithRelevance(keyword, page, size);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("records", hotArticleService.extractResults(response));
+        result.put("total", hotArticleService.getTotalHits(response));
+        result.put("page", page);
+        result.put("size", size);
+        
+        return Response.success(result);
     }
 }

@@ -74,7 +74,7 @@ public class UserLoginServiceImpl implements UserLoginService {
         String username = userDetails.getUsername();
         Long userId = userDetails.getUserId();
         String accessToken = jwtUtils.generateAccessToken(username,userId,permissionCodes);
-        String refreshToken = jwtUtils.generateRefreshToken(username);
+        String refreshToken = jwtUtils.generateRefreshToken(username, userId);
         String tokenType = "Bearer";
         String expiresIn = jwtUtils.extractExpiration(accessToken).toString();
 
@@ -93,14 +93,6 @@ public class UserLoginServiceImpl implements UserLoginService {
         }
 
         // 设置安全上下文
-        System.out.println(Response.success(new LoginResponseDTO(
-                username,
-                user.getId(),
-                tokenType,
-                accessToken,
-                refreshToken,
-                expiresIn
-        )));
         return Response.success(new LoginResponseDTO(
                 username,
                 user.getId(),

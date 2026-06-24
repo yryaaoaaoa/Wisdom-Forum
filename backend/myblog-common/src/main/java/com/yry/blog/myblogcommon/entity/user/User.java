@@ -10,18 +10,31 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @TableName("users")
-
 public class User {
-    private String username;
-    private String password;
-    private String nickname;
-    private String email;
-    private String avatar_url;
     @TableId(type = IdType.AUTO)
     private Long id;
+    
+    @TableField("username")
+    private String username;
+    
+    @TableField("password")
+    private String password;
+    
+    @TableField("nickname")
+    private String nickname;
+    
+    @TableField("email")
+    private String email;
+    
+    @TableField("avatar_url")
+    private String avatarUrl;
+    
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;
+    
     @TableField(fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updatedAt;
-    boolean enabled = true;
+    
+    @TableField("enabled")
+    private boolean enabled = true;
 }

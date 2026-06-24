@@ -1,17 +1,18 @@
-<!-- src/components/Sidebar/sidebar.vue -->
 <template>
-  <div class="sidebar-container">
-    <div class="sidebar-logo">
-      <h2>博客管理系统</h2>
+  <div class="sidebar-wrap">
+    <div class="sidebar-brand">
+      <span class="brand-bracket">&lt;</span>
+      <span class="brand-name">管理后台</span>
+      <span class="brand-bracket">/&gt;</span>
     </div>
     <el-menu
-        :default-active="activeMenu"
-        class="sidebar-menu"
-        background-color="#304156"
-        text-color="#bfcbd9"
-        active-text-color="#409eff"
-        unique-opened
-        router
+      :default-active="activeMenu"
+      class="sidebar-menu"
+      background-color="#1e293b"
+      text-color="#94a3b8"
+      active-text-color="#0ea5e9"
+      unique-opened
+      router
     >
       <el-menu-item index="/home">
         <el-icon><House /></el-icon>
@@ -34,13 +35,20 @@
         <el-menu-item index="/post/list">文章列表</el-menu-item>
       </el-sub-menu>
 
+      <el-sub-menu index="role-management">
+        <template #title>
+          <el-icon><Document /></el-icon>
+          <span>角色管理</span>
+        </template>
+        <el-menu-item index="/role/list">角色列表</el-menu-item>
+      </el-sub-menu>
+
       <el-sub-menu index="category-management">
         <template #title>
           <el-icon><Folder /></el-icon>
           <span>分类管理</span>
         </template>
         <el-menu-item index="/category/list">分类列表</el-menu-item>
-        <el-menu-item index="/category/create">添加分类</el-menu-item>
       </el-sub-menu>
 
       <el-menu-item index="/settings">
@@ -66,7 +74,6 @@ const route = useRoute()
 
 const activeMenu = computed(() => {
   const { meta, path } = route
-  // if set path, the sidebar will highlight the path you set
   if (meta.activeMenu) {
     return meta.activeMenu
   }
@@ -75,43 +82,85 @@ const activeMenu = computed(() => {
 </script>
 
 <style lang="scss" scoped>
-.sidebar-container {
+.sidebar-wrap {
   height: 100%;
-  background-color: #304156;
-  transition: width 0.28s;
-  width: 210px !important;
+  background-color: #1e293b;
+  width: 220px !important;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 
-  .sidebar-logo {
-    height: 50px;
+  .sidebar-brand {
+    height: 52px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #2b3a4d;
+    gap: 2px;
+    border-bottom: 2px solid var(--c-primary);
 
-    h2 {
-      color: #fff;
-      margin: 0;
-      font-size: 18px;
-      font-weight: 600;
+    .brand-bracket {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #64748b;
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 700;
+      color: #f1f5f9;
+      margin: 0 4px;
     }
   }
 
   .sidebar-menu {
     border: none;
-    height: calc(100% - 50px);
+    flex: 1;
+    overflow-y: auto;
     width: 100% !important;
+
+    &::-webkit-scrollbar {
+      width: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 2px;
+    }
   }
 
   :deep(.el-menu-item),
   :deep(.el-sub-menu__title) {
+    height: 44px;
+    line-height: 44px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    border-left: 3px solid transparent;
+    transition: all var(--transition-fast);
+
     &:hover {
-      background-color: #263445 !important;
+      background-color: #334155 !important;
+      border-left-color: var(--c-primary);
     }
   }
 
   :deep(.el-menu-item.is-active) {
-    background-color: #1f2d3d !important;
+    background-color: #334155 !important;
+    border-left-color: var(--c-primary);
+    font-weight: 600;
+  }
+
+  :deep(.el-sub-menu .el-menu-item) {
+    padding-left: 52px !important;
+    font-size: 12px;
+    height: 38px;
+    line-height: 38px;
+    border-left: 3px solid transparent;
+
+    &:hover {
+      border-left-color: var(--c-primary-dark);
+    }
   }
 }
 </style>

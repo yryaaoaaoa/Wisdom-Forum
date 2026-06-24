@@ -9,6 +9,7 @@
         <id property="id" column="id"/>
         <result property="authId" column="auth_id"/>
         <result property="authName" column="auth_name"/>
+        <result property="authAvatar" column="auth_avatar"/>
         <result property="coverUrl" column="cover_url"/>
         <result property="title" column="title"/>
         <result property="summary" column="summary"/>
@@ -23,14 +24,15 @@
     <select id="selectArticlePage" resultMap="ArticleVOMap">
         SELECT
         a.*,
-        u.nickname,
-        u.avatar_url
+        u.nickname AS auth_name,
+        u.avatar_url AS auth_avatar
         FROM
         articles a
         LEFT JOIN
         users u ON a.auth_id = u.id
         <where>
-            a.status != 0
+            a.is_deleted = 0
+            AND a.status != 0
             <!-- 动态条件：标题 -->
             <if test="query.title != null and query.title != ''">
                 AND a.title LIKE CONCAT('%', #{query.title}, '%')
@@ -50,37 +52,6 @@
                 ASC
             </when>
             <otherwise> <!-- 默认或 sortOrder == 1 -->
-                DESC
-            </otherwise>
-        </choose>
-    </select>
-
-    <select id="selectArticleIdPage" resultType="java.lang.Long">
-        SELECT
-        a.id  -- 只查询文章id字段
-        FROM
-        articles a
-        LEFT JOIN
-        users u ON a.auth_id = u.id
-        <where>
-            a.status != 0
-            <!-- 保留原有动态条件 -->
-            <if test="query.title != null and query.title != ''">
-                AND a.title LIKE CONCAT('%', #{query.title}, '%')
-            </if>
-            <if test="query.status != null">
-                AND a.status = #{query.status}
-            </if>
-            <if test="query.authorName != null and query.authorName != ''">
-                AND u.nickname LIKE CONCAT('%', #{query.authorName}, '%')
-            </if>
-        </where>
-        ORDER BY a.created_at
-        <choose>
-            <when test="query.sortOrder != null and query.sortOrder == 0">
-                ASC
-            </when>
-            <otherwise>
                 DESC
             </otherwise>
         </choose>

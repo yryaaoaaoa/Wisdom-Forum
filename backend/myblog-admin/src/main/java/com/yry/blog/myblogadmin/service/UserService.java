@@ -9,13 +9,14 @@ import com.yry.blog.myblogcommon.entity.user.User;
 import com.yry.blog.myblogcommon.result.PaginationResponse;
 import com.yry.blog.myblogcommon.result.Response;
 
-public interface UserService extends IService<User> {  // 继承 IService<User>
+public interface UserService extends IService<User> {
     User findByUsername (String username);
     void addUser(UserRegisterDTO dto);
     Response<UserUpdateDTO> updateUser(Long id,UserUpdateDTO dto);
     Response<Object> deleteUser(Long id);
     Response<Boolean> resetPassword(String username, String oldPassword, String newPassword);
-    // 添加分页查询方法
     Response<PaginationResponse<UserAdminVO>> pageUsers(UserQueryDTO queryDTO);
     void forgetPassword(String username, String email);
+    Response<String> updateAvatar(Long userId, String avatarUrl);
+    Response<UserAdminVO> getCurrentUser(Long userId);
 }

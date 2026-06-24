@@ -1,8 +1,8 @@
 package com.yry.blog.myblogadmin.auth;
 
-import org.springframework.stereotype.Service;
+import com.yry.blog.myblogadmin.dto.TokenRefreshResponseDTO;
 
 
 public interface AuthService {
-    public String refreshToken(String refreshToken);
+    TokenRefreshResponseDTO refreshToken(String refreshToken);
 }

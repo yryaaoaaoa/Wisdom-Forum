@@ -34,7 +34,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 2. 如果Token存在
         if (accessToken != null) {
             // 检查 Access Token 是否过期或者临期
-            System.out.println(accessToken);
             if (jwtUtils.validateToken(accessToken)) {
                 // Token 有效，正常处理
                 Authentication authentication = jwtUtils.getAuthentication(accessToken);

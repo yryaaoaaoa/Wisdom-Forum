@@ -10,7 +10,7 @@ import com.yry.blog.myblogadmin.vo.UserAdminVO;
 import com.yry.blog.myblogadmin.dto.UserQueryDTO;
 import com.yry.blog.myblogadmin.dto.UserRegisterDTO;
 import com.yry.blog.myblogadmin.dto.UserUpdateDTO;
-import com.yry.blog.myblogadmin.mapper.mastruct.UserConvertMapper;
+import com.yry.blog.myblogadmin.mapper.mapstruct.UserConvertMapper;
 import com.yry.blog.myblogadmin.service.UserService;
 import com.yry.blog.myblogcommon.entity.Role.Role;
 import com.yry.blog.myblogcommon.entity.UserRole.UserRole;
@@ -22,6 +22,7 @@ import com.yry.blog.myblogadmin.mapper.UserMapper;
 import com.yry.blog.myblogadmin.mapper.UserRoleMapper;
 import com.yry.blog.myblogcommon.result.PaginationResponse;
 import com.yry.blog.myblogcommon.result.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,14 +31,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.stream.Collectors;
 
-/**
- * 用户服务实现类
- * 提供用户相关的CRUD操作及分页查询功能
- */
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+
+@Slf4j
 @Service
-@Transactional  // 声明类中所有方法默认开启事务
+@Transactional
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService { //这里集成了ServiceImpl，所以可以直接使用它的方法
 
     private final PasswordEncoder passwordEncoder;  // Spring Security密码编码器
@@ -101,14 +103,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 4. 构建更新条件 + 仅更新允许修改的字段（局部更新）
         UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq("id", id) // 仅更新当前用户
-                .set("nickname", dto.getNickname()) // 昵称
-                .set("email", dto.getEmail()) // 邮箱
-                .set("avatar_url", dto.getAvatar_url()); // 头像地址
+        updateWrapper.eq("id", id)
+                .set("nickname", dto.getNickname())
+                .set("email", dto.getEmail())
+                .set("avatar_url", dto.getAvatarUrl());
+        if (dto.getEnabled() != null) {
+            updateWrapper.set("enabled", dto.getEnabled());
+        }
         // 5. 执行更新并校验结果
         boolean updateSuccess = this.update(updateWrapper);
         if (!updateSuccess) {
             return Response.error(ResponseCodeEnums.INTERNAL_SERVER_ERROR);
+        }
+
+        // 6. 更新用户角色
+        if (dto.getRoles() != null) {
+            userRoleMapper.delete(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, id));
+            for (String roleName : dto.getRoles()) {
+                Role role = roleMapper.selectOne(
+                        new LambdaQueryWrapper<Role>().eq(Role::getRoleName, roleName)
+                );
+                if (role != null) {
+                    UserRole userRole = UserRole.builder()
+                            .userId(id)
+                            .roleId(role.getId())
+                            .build();
+                    userRoleMapper.insert(userRole);
+                }
+            }
         }
 
         // 6. 返回数据库中实际更新后的数据（保证一致性）
@@ -127,9 +149,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (!checkPermission.check(id)){
             return Response.error(ResponseCodeEnums.PERMISSION_DENIED);
         }
-        // 根据ID直接删除
-        System.out.println("删除用户成功");
-        return Response.success(this.removeById(id));
+        // 级联清理用户角色关联
+        userRoleMapper.delete(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, id));
+        boolean removed = this.removeById(id);
+        log.info("删除用户成功, userId: {}", id);
+        return Response.success(removed);
     }
     /**
      * 根据用户名查询用户
@@ -150,9 +174,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Response<PaginationResponse<UserAdminVO>> pageUsers(UserQueryDTO queryDTO) {
-        // 初始化分页参数
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println(authentication);
+        log.debug("当前认证用户: {}", authentication);
         Page<User> page = new Page<>(queryDTO.getCurrent(), queryDTO.getSize());
         LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>(); // LambdaQueryWrapper链式查询条件构造器
         if (StringUtils.hasText(queryDTO.getKeyword())) {
@@ -188,7 +211,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 执行分页查询
         IPage<User> userPage = this.page(page, wrapper);
         // 将实体分页转换为DTO分页
-        IPage<UserAdminVO> dtoPage = userPage.convert(userConvertMapper::userToAdminDTO);
+        IPage<UserAdminVO> dtoPage = userPage.convert(user -> {
+            UserAdminVO vo = userConvertMapper.userToAdminDTO(user);
+            vo.setEnabled(user.isEnabled());
+            return vo;
+        });
+        // 批量填充角色名
+        List<Long> userIds = dtoPage.getRecords().stream()
+                .map(UserAdminVO::getId)
+                .collect(Collectors.toList());
+        if (!userIds.isEmpty()) {
+            List<UserRole> allUserRoles = userRoleMapper.selectList(
+                    new LambdaQueryWrapper<UserRole>().in(UserRole::getUserId, userIds)
+            );
+            Map<Long, List<Long>> userRoleMap = allUserRoles.stream()
+                    .collect(Collectors.groupingBy(UserRole::getUserId,
+                            Collectors.mapping(UserRole::getRoleId, Collectors.toList())));
+            List<Long> allRoleIds = allUserRoles.stream()
+                    .map(UserRole::getRoleId)
+                    .distinct()
+                    .collect(Collectors.toList());
+            Map<Long, String> roleNameMap = roleMapper.selectBatchIds(allRoleIds).stream()
+                    .collect(Collectors.toMap(Role::getId, Role::getRoleName));
+            dtoPage.getRecords().forEach(vo -> {
+                List<Long> roleIds = userRoleMap.getOrDefault(vo.getId(), Collections.emptyList());
+                vo.setRoleName(roleIds.stream()
+                        .map(rid -> roleNameMap.getOrDefault(rid, ""))
+                        .filter(n -> !n.isEmpty())
+                        .collect(Collectors.joining(", ")));
+            });
+        }
         // 包装分页响应
         PaginationResponse<UserAdminVO> paginationResponse = new PaginationResponse<>(dtoPage);
 
@@ -239,16 +291,57 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         this.updateById(user);
     }
     private void assignDefaultRole(User user) {
-        // 方式1: 通过角色名称查找普通用户角色
         Role normalUserRole = roleMapper.selectOne(new LambdaQueryWrapper<Role>()
-                .eq(Role::getId, "2")); // 或者使用角色编码如 "ROLE_USER"
+                .eq(Role::getRoleName, "ROLE_USER"));
 
         if (normalUserRole != null) {
-            // 创建用户角色关联
             UserRole userRole = new UserRole();
             userRole.setUserId(user.getId());
             userRole.setRoleId(normalUserRole.getId());
             userRoleMapper.insert(userRole);
         }
+    }
+
+    @Override
+    public Response<String> updateAvatar(Long userId, String avatarUrl) {
+        User user = this.getById(userId);
+        if (user == null) {
+            return Response.error(ResponseCodeEnums.USER_NOT_EXIST);
+        }
+        
+        UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("id", userId)
+                .set("avatar_url", avatarUrl);
+        
+        boolean success = this.update(updateWrapper);
+        if (!success) {
+            return Response.error(ResponseCodeEnums.INTERNAL_SERVER_ERROR);
+        }
+        
+        return Response.success(avatarUrl);
+    }
+
+    @Override
+    public Response<UserAdminVO> getCurrentUser(Long userId) {
+        User user = this.getById(userId);
+        if (user == null) {
+            return Response.error(ResponseCodeEnums.USER_NOT_EXIST);
+        }
+        UserAdminVO vo = userConvertMapper.userToAdminDTO(user);
+        vo.setEnabled(user.isEnabled());
+        // 填充角色名
+        List<UserRole> userRoles = userRoleMapper.selectList(
+                new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, userId)
+        );
+        if (!userRoles.isEmpty()) {
+            List<Long> roleIds = userRoles.stream()
+                    .map(UserRole::getRoleId)
+                    .collect(Collectors.toList());
+            String roleName = roleMapper.selectBatchIds(roleIds).stream()
+                    .map(Role::getRoleName)
+                    .collect(Collectors.joining(", "));
+            vo.setRoleName(roleName);
+        }
+        return Response.success(vo);
     }
 }

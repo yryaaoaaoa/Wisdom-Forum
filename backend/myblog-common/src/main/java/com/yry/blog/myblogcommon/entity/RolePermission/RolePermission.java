@@ -1,31 +1,26 @@
 package com.yry.blog.myblogcommon.entity.RolePermission;
 
-import lombok.Data;
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-/**
- * 角色权限关联实体类
- */
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+@TableName("role_permission")
 public class RolePermission {
-    /**
-     * 主键ID
-     */
+    
+    @TableId(type = IdType.AUTO)
     private Long id;
-
-    /**
-     * 角色ID
-     */
+    
+    @TableField("role_id")
     private Long roleId;
-
-    /**
-     * 权限标识
-     */
+    
+    @TableField("permission")
     private String permission;
-
-    /**
-     * 创建时间
-     */
+    
+    @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createTime;
 }

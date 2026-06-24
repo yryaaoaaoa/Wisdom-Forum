@@ -52,8 +52,10 @@ public class JwtUtils {
         return generateToken(username, expiration, claims);
     }
 
-    public String generateRefreshToken(String username) {
-        return generateToken(username, refreshexpiration, Map.of());
+    public String generateRefreshToken(String username, Long userId) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId);
+        return generateToken(username, refreshexpiration, claims);
     }
 
     public Claims parseToken(String token) {
