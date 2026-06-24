@@ -1,0 +1,81 @@
+package com.yry.blog.myblogwebsocket.controller;
+
+import com.yry.blog.myblogwebsocket.dto.NotificationMessage;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/notification")
+@RequiredArgsConstructor
+public class WebSocketNotificationController {
+
+    private final SimpMessagingTemplate messagingTemplate;
+
+    @Qualifier("myblogTaskExecutor")
+    private final ExecutorService myblogTaskExecutor;
+
+    @PostMapping("/like")
+    public String sendLikeNotification(@RequestBody NotificationMessage message) {
+        if (message.getSenderName() == null || message.getContentId() == null) {
+            log.warn("点赞通知参数缺失，senderName={}, postId={}", message.getSenderName(), message.getContentId());
+            return "参数错误：发送者ID和帖子ID不能为空";
+        }
+        message.setType("LIKE");
+        message.setCreateTime(LocalDateTime.now());
+
+        try {
+            myblogTaskExecutor.submit(() -> {
+                messagingTemplate.convertAndSendToUser(message.getReceiverId(),"/queue/like", message);
+                log.info("点赞通知推送成功，postId={}, senderName={}", message.getContentId(), message.getSenderName());
+            });
+            return "点赞通知已提交发送";
+        } catch (RejectedExecutionException e) {
+            log.error("线程池饱和，点赞通知推送失败，postId={}", message.getContentId(), e);
+            return "通知发送暂时繁忙，请稍后再试（点赞已生效）";
+        } catch (Exception e) {
+            log.error("点赞通知提交失败，message={}", message, e);
+            return "通知发送失败（点赞已生效）";
+        }
+    }
+
+    @PostMapping("/mention")
+    public String sendMentionNotification(@RequestBody NotificationMessage message) {
+        if (message.getReceiverId() == null || message.getSenderName() == null || message.getContentId() == null) {
+            log.warn("@提醒参数缺失，receiverId={}, senderName={}, postId={}",
+                    message.getReceiverId(), message.getSenderName(), message.getContentId());
+            return "参数错误：接收者ID、发送者ID、帖子ID不能为空";
+        }
+
+        message.setType("MENTION");
+        message.setCreateTime(LocalDateTime.now());
+
+        try {
+            myblogTaskExecutor.submit(() -> {
+                messagingTemplate.convertAndSendToUser(
+                        message.getReceiverId(),
+                        "/queue/mention",
+                        message
+                );
+                log.info("@提醒推送成功，receiverId={}, postId={}", message.getReceiverId(), message.getContentId());
+            });
+            return "@提醒已提交发送";
+        } catch (RejectedExecutionException e) {
+            log.error("线程池饱和，@提醒推送失败，receiverId={}", message.getReceiverId(), e);
+            return "通知发送暂时繁忙，请稍后再试";
+        } catch (Exception e) {
+            log.error("@提醒提交失败，message={}", message, e);
+            return "通知发送失败";
+        }
+    }
+}

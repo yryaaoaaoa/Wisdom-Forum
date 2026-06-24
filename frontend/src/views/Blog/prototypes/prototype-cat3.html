@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分类 · 智汇论坛</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c-bg: #f8fafc;
+    --c-bg-card: #ffffff;
+    --c-text: #1e293b;
+    --c-text-secondary: #64748b;
+    --c-text-muted: #94a3b8;
+    --c-border: #e2e8f0;
+    --c-border-light: #f1f5f9;
+    --c-primary: #0ea5e9;
+    --c-primary-hover: #38bdf8;
+    --c-primary-dark: #0284c7;
+    --font-display: 'Playfair Display', 'Noto Serif SC', 'Songti SC', Georgia, serif;
+    --font-body: 'Outfit', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --space-2xl: 48px;
+    --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-primary: 0 4px 14px rgba(14,165,233,0.15);
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.25s ease;
+    --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --max-width: 860px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-body);
+    background: var(--c-bg);
+    color: var(--c-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) 80px;
+  }
+
+  /* ─── Header ─── */
+  .page-header {
+    margin-bottom: var(--space-2xl);
+  }
+  .page-header .breadcrumb {
+    font-size: 13px;
+    color: var(--c-text-muted);
+    margin-bottom: var(--space-md);
+  }
+  .page-header .breadcrumb a {
+    color: var(--c-text-muted);
+    text-decoration: none;
+  }
+  .page-header .breadcrumb a:hover { color: var(--c-primary); }
+  .page-header .breadcrumb .sep { margin: 0 6px; color: var(--c-border); }
+  .page-header h1 {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--c-text);
+    letter-spacing: -0.02em;
+  }
+  .page-header p {
+    font-size: 15px;
+    color: var(--c-text-secondary);
+    margin-top: var(--space-xs);
+  }
+
+  /* ─── Category List ─── */
+  .category-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+
+  .cat-row {
+    background: var(--c-bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-border);
+    padding: var(--space-lg);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    gap: var(--space-lg);
+    align-items: center;
+    position: relative;
+  }
+
+  .cat-row:hover {
+    border-color: var(--c-primary);
+    box-shadow: var(--shadow-primary);
+    transform: translateY(-2px);
+  }
+
+  .cat-row .cat-icon {
+    width: 48px; height: 48px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: var(--icon-bg, var(--c-border-light));
+    flex-shrink: 0;
+  }
+
+  .cat-row .cat-info {
+    min-width: 0;
+  }
+
+  .cat-row .cat-info .cat-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--c-text);
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: 2px;
+  }
+
+  .cat-row .cat-info .cat-name .count {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--c-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .cat-row .cat-info .cat-desc {
+    font-size: 13px;
+    color: var(--c-text-secondary);
+    line-height: 1.5;
+  }
+
+  .cat-row .cat-articles-preview {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: var(--space-lg);
+    border-left: 1px solid var(--c-border-light);
+    min-width: 280px;
+  }
+
+  .cat-row .cat-articles-preview .preview-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: 13px;
+    color: var(--c-text-secondary);
+    transition: color var(--transition-fast);
+  }
+
+  .cat-row .cat-articles-preview .preview-item .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--c-primary);
+    flex-shrink: 0;
+    opacity: 0.4;
+  }
+
+  .cat-row .cat-articles-preview .preview-item .date {
+    font-size: 11px;
+    color: var(--c-text-muted);
+    font-family: var(--font-mono);
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+
+  .cat-row:hover .cat-articles-preview .preview-item {
+    color: var(--c-text);
+  }
+
+  .cat-row .cat-arrow {
+    font-size: 18px;
+    color: var(--c-border);
+    transition: all var(--transition-fast);
+    flex-shrink: 0;
+  }
+
+  .cat-row:hover .cat-arrow {
+    color: var(--c-primary);
+    transform: translateX(4px);
+  }
+
+  .cat-row .empty-preview {
+    font-size: 13px;
+    color: var(--c-text-muted);
+    padding-left: var(--space-lg);
+    border-left: 1px solid var(--c-border-light);
+    min-width: 200px;
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 768px) {
+    .cat-row {
+      grid-template-columns: 40px 1fr;
+      gap: var(--space-md);
+    }
+    .cat-row .cat-articles-preview,
+    .cat-row .empty-preview {
+      display: none;
+    }
+    .cat-row .cat-arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="#">首页</a>
+      <span class="sep">/</span>
+      <span>分类</span>
+    </div>
+    <h1>全部分类</h1>
+    <p>共收录 43 篇文章，分布在 8 个分类中</p>
+  </div>
+
+  <div class="category-list">
+    <a href="#" class="cat-row">
+      <div class="cat-icon" style="background:#f0f9ff;">☕</div>
+      <div class="cat-info">
+        <div class="cat-name">Java <span class="count">12 篇</span></div>
+        <div class="cat-desc">核心语法、JVM 调优、并发编程、设计模式</div>
+      </div>
+      <div class="cat-articles-preview">
+        <span class="preview-item"><span class="dot"></span>深入理解 JVM 垃圾回收机制与调优实践 <span class="date">06-15</span></span>
+        <span class="preview-item"><span class="dot"></span>Java Stream API 实战：高效数据处理 <span class="date">06-10</span></span>
+        <span class="preview-item"><span class="dot"></span>Java 并发编程：线程池源码解析 <span class="date">06-03</span></span>
+      </div>
+      <span class="cat-arrow">→</span>
+    </a>
+
+    <a href="#" class="cat-row">
+      <div class="cat-icon" style="background:#f0fdf4;">🍃</div>
+      <div class="cat-info">
+        <div class="cat-name">Spring Boot <span class="count">8 篇</span></div>
+        <div class="cat-desc">Spring 全家桶、微服务架构、自动化配置</div>
+      </div>
+      <div class="cat-articles-preview">
+        <span class="preview-item"><span class="dot"></span>Spring Boot 3.0 新特性全面解读 <span class="date">05-28</span></span>
+        <span class="preview-item"><span class="dot"></span>Spring Security 实战：JWT 认证 <span class="date">05-20</span></span>
+      </div>
+      <span class="cat-arrow">→</span>
+    </a>
+
+    <a href="#" class="cat-row">
+      <div class="cat-icon" style="background:#f5f3ff;">⚛</div>
+      <div class="cat-info">
+        <div class="cat-name">前端 <span class="count">6 篇</span></div>
+        <div class="cat-desc">Vue 3、React、TypeScript、CSS 技术</div>
+      </div>
+      <div class="cat-articles-preview">
+        <span class="preview-item"><span class="dot"></span>Vue 3 组合式 API 深入理解 <span class="date">05-15</span></span>
+        <span class="preview-item"><span class="dot"></span>TypeScript 类型体操进阶指南 <span class="date">05-08</span></span>
+      </div>
+      <span class="cat-arrow">→</span>
+    </a>
+
+    <a href="#" class="cat-row">
+      <div class="cat-icon" style="background:#fffbeb;">🗄</div>
+      <div class="cat-info">
+        <div class="cat-name">数据库 <span class="count">5 篇</span></div>
+        <div class="cat-desc">MySQL、Redis、MongoDB 原理与优化</div>
+      </div>
+      <div class="cat-articles-preview">
+        <span class="preview-item"><span class="dot"></span>MySQL 索引原理与慢查询优化 <span class="date">05-01</span></span>
+      </div>
+      <span class="cat-arrow">→</span>
+    </a>
+
+    <a href="#" class="cat-row">
+      <div class="cat-icon" style="background:#fef2f2;">🔧</div>
+      <div class="cat-info">
+        <div class="cat-name">DevOps <span class="count">4 篇</span></div>
+        <div class="cat-desc">Docker、Kubernetes、CI/CD</div>
+      </div>
+      <div class="cat-articles-preview">
+        <span class="preview-item"><span class="dot"></span>Docker 容器化部署 Spring Boot <span class="date">04-25</span></span>
+      </div>
+      <span class="cat-arrow">→</span>
+    </a>
+
+    <a href="#" class="cat-row">
+      <div class="cat-icon" style="background:#ecfeff;">🏗</div>
+      <div class="cat-info">
+        <div class="cat-name">架构设计 <span class="count">3 篇</span></div>
+        <div class="cat-desc">系统架构、微服务、领域驱动设计</div>
+      </div>
+      <div class="empty-preview">暂无更多预览</div>
+      <span class="cat-arrow">→</span>
+    </a>
+
+    <a href="#" class="cat-row">
+      <div class="cat-icon" style="background:#f5f3ff;">🧮</div>
+      <div class="cat-info">
+        <div class="cat-name">算法 <span class="count">3 篇</span></div>
+        <div class="cat-desc">数据结构、LeetCode 题解、竞赛</div>
+      </div>
+      <div class="empty-preview">暂无更多预览</div>
+      <span class="cat-arrow">→</span>
+    </a>
+
+    <a href="#" class="cat-row">
+      <div class="cat-icon" style="background:#f5f5f4;">✍</div>
+      <div class="cat-info">
+        <div class="cat-name">随笔 <span class="count">2 篇</span></div>
+        <div class="cat-desc">技术人生、读书笔记、杂谈</div>
+      </div>
+      <div class="empty-preview">暂无更多预览</div>
+      <span class="cat-arrow">→</span>
+    </a>
+  </div>
+</div>
+</body>
+</html>

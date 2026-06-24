@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分类 · 智汇论坛</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c-bg: #f8fafc;
+    --c-bg-card: #ffffff;
+    --c-text: #1e293b;
+    --c-text-secondary: #64748b;
+    --c-text-muted: #94a3b8;
+    --c-border: #e2e8f0;
+    --c-border-light: #f1f5f9;
+    --c-primary: #0ea5e9;
+    --c-primary-hover: #38bdf8;
+    --c-primary-dark: #0284c7;
+    --font-display: 'Playfair Display', 'Noto Serif SC', 'Songti SC', Georgia, serif;
+    --font-body: 'Outfit', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --space-2xl: 48px;
+    --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-primary: 0 4px 14px rgba(14,165,233,0.15);
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.25s ease;
+    --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --max-width: 1200px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-body);
+    background: var(--c-bg);
+    color: var(--c-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) 80px;
+  }
+
+  /* ─── Header ─── */
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--c-text);
+  }
+  .page-header h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--c-text);
+    letter-spacing: -0.02em;
+  }
+  .page-header h1 small {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--c-text-muted);
+    margin-left: 10px;
+    font-family: var(--font-body);
+  }
+  .page-header .stats-line {
+    font-size: 13px;
+    color: var(--c-text-muted);
+  }
+
+  /* ─── Grid ─── */
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--space-lg);
+  }
+
+  .cat-card {
+    background: var(--c-bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--c-border);
+    padding: var(--space-lg);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent, var(--c-primary));
+    opacity: 0;
+    transition: opacity var(--transition-base);
+  }
+
+  .cat-card:hover {
+    border-color: var(--accent, var(--c-primary));
+    box-shadow: var(--shadow-primary);
+    transform: translateY(-3px);
+  }
+
+  .cat-card:hover::before {
+    opacity: 1;
+  }
+
+  .cat-card .card-top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-sm);
+  }
+
+  .cat-card .icon-wrap {
+    width: 44px; height: 44px;
+    border-radius: var(--radius-sm);
+    background: var(--accent-bg, var(--c-border-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    color: var(--accent, var(--c-primary));
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+  }
+
+  .cat-card:hover .icon-wrap {
+    transform: scale(1.05);
+  }
+
+  .cat-card .cat-name {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--c-text);
+    margin-bottom: 2px;
+  }
+
+  .cat-card .cat-count {
+    font-size: 12px;
+    color: var(--c-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .cat-card .cat-desc {
+    font-size: 13px;
+    color: var(--c-text-secondary);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: var(--space-md);
+    min-height: 39px;
+  }
+
+  .cat-card .cat-preview {
+    padding-top: var(--space-sm);
+    border-top: 1px solid var(--c-border-light);
+  }
+
+  .cat-card .cat-preview .preview-label {
+    font-size: 11px;
+    color: var(--c-text-muted);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .cat-card .cat-preview .preview-item {
+    font-size: 13px;
+    color: var(--c-text-secondary);
+    padding: 3px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color var(--transition-fast);
+  }
+
+  .cat-card .cat-preview .preview-item::before {
+    content: '·';
+    color: var(--c-primary);
+    font-weight: 700;
+  }
+
+  .cat-card:hover .cat-preview .preview-item {
+    color: var(--c-text);
+  }
+
+  .cat-card .card-arrow {
+    position: absolute;
+    right: var(--space-lg);
+    bottom: var(--space-lg);
+    font-size: 16px;
+    color: var(--c-border);
+    transition: all var(--transition-fast);
+  }
+
+  .cat-card:hover .card-arrow {
+    color: var(--accent, var(--c-primary));
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 640px) {
+    .category-grid { grid-template-columns: 1fr; }
+    .page-header { flex-direction: column; align-items: flex-start; gap: var(--space-sm); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="page-header">
+    <h1>分类 <small>探索 8 个技术领域</small></h1>
+    <span class="stats-line">共 43 篇文章</span>
+  </div>
+
+  <div class="category-grid">
+    <!-- Java -->
+    <a href="#" class="cat-card" style="--accent:#0ea5e9;--accent-bg:#f0f9ff;">
+      <div class="card-top">
+        <div class="icon-wrap">☕</div>
+        <div>
+          <div class="cat-name">Java</div>
+          <div class="cat-count">12 篇文章</div>
+        </div>
+      </div>
+      <div class="cat-desc">Java 核心语法、JVM 调优、并发编程、设计模式等</div>
+      <div class="cat-preview">
+        <div class="preview-label">最近文章</div>
+        <div class="preview-item">深入理解 JVM 垃圾回收机制与调优实践</div>
+        <div class="preview-item">Java Stream API 实战：高效数据处理</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <!-- Spring Boot -->
+    <a href="#" class="cat-card" style="--accent:#16a34a;--accent-bg:#f0fdf4;">
+      <div class="card-top">
+        <div class="icon-wrap">🍃</div>
+        <div>
+          <div class="cat-name">Spring Boot</div>
+          <div class="cat-count">8 篇文章</div>
+        </div>
+      </div>
+      <div class="cat-desc">Spring 全家桶、微服务架构、自动化配置与开发最佳实践</div>
+      <div class="cat-preview">
+        <div class="preview-label">最近文章</div>
+        <div class="preview-item">Spring Boot 3.0 新特性全面解读</div>
+        <div class="preview-item">Spring Security 实战：JWT 认证方案</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <!-- 前端 -->
+    <a href="#" class="cat-card" style="--accent:#8b5cf6;--accent-bg:#f5f3ff;">
+      <div class="card-top">
+        <div class="icon-wrap">⚛</div>
+        <div>
+          <div class="cat-name">前端</div>
+          <div class="cat-count">6 篇文章</div>
+        </div>
+      </div>
+      <div class="cat-desc">Vue 3、React、TypeScript、CSS 等前端技术</div>
+      <div class="cat-preview">
+        <div class="preview-label">最近文章</div>
+        <div class="preview-item">Vue 3 组合式 API 深入理解</div>
+        <div class="preview-item">TypeScript 类型体操进阶指南</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <!-- 数据库 -->
+    <a href="#" class="cat-card" style="--accent:#d97706;--accent-bg:#fffbeb;">
+      <div class="card-top">
+        <div class="icon-wrap">🗄</div>
+        <div>
+          <div class="cat-name">数据库</div>
+          <div class="cat-count">5 篇文章</div>
+        </div>
+      </div>
+      <div class="cat-desc">MySQL、Redis、MongoDB 等数据库原理与优化</div>
+      <div class="cat-preview">
+        <div class="preview-label">最近文章</div>
+        <div class="preview-item">MySQL 索引原理与慢查询优化</div>
+        <div class="preview-item">Redis 缓存穿透/击穿/雪崩解决方案</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <!-- DevOps -->
+    <a href="#" class="cat-card" style="--accent:#dc2626;--accent-bg:#fef2f2;">
+      <div class="card-top">
+        <div class="icon-wrap">🔧</div>
+        <div>
+          <div class="cat-name">DevOps</div>
+          <div class="cat-count">4 篇文章</div>
+        </div>
+      </div>
+      <div class="cat-desc">Docker、Kubernetes、CI/CD、监控与运维</div>
+      <div class="cat-preview">
+        <div class="preview-label">最近文章</div>
+        <div class="preview-item">Docker 容器化部署 Spring Boot 应用</div>
+        <div class="preview-item">GitHub Actions 自动化 CI/CD 流程</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <!-- 架构设计 -->
+    <a href="#" class="cat-card" style="--accent:#0891b2;--accent-bg:#ecfeff;">
+      <div class="card-top">
+        <div class="icon-wrap">🏗</div>
+        <div>
+          <div class="cat-name">架构设计</div>
+          <div class="cat-count">3 篇文章</div>
+        </div>
+      </div>
+      <div class="cat-desc">系统架构设计、微服务拆分、领域驱动设计等</div>
+      <div class="cat-preview">
+        <div class="preview-label">最近文章</div>
+        <div class="preview-item">从单体到微服务：架构演进实战</div>
+        <div class="preview-item">DDD 领域驱动设计在项目中的落地</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <!-- 算法 -->
+    <a href="#" class="cat-card" style="--accent:#7c3aed;--accent-bg:#f5f3ff;">
+      <div class="card-top">
+        <div class="icon-wrap">🧮</div>
+        <div>
+          <div class="cat-name">算法</div>
+          <div class="cat-count">3 篇文章</div>
+        </div>
+      </div>
+      <div class="cat-desc">数据结构与算法、LeetCode 题解、竞赛经验</div>
+      <div class="cat-preview">
+        <div class="preview-label">最近文章</div>
+        <div class="preview-item">常见排序算法对比与复杂度分析</div>
+        <div class="preview-item">动态规划解题套路框架</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>
+
+    <!-- 随笔 -->
+    <a href="#" class="cat-card" style="--accent:#78716c;--accent-bg:#f5f5f4;">
+      <div class="card-top">
+        <div class="icon-wrap">✍</div>
+        <div>
+          <div class="cat-name">随笔</div>
+          <div class="cat-count">2 篇文章</div>
+        </div>
+      </div>
+      <div class="cat-desc">技术人生、读书笔记、杂谈感悟</div>
+      <div class="cat-preview">
+        <div class="preview-label">最近文章</div>
+        <div class="preview-item">十年程序员的技术成长之路</div>
+        <div class="preview-item">2026 年中技术趋势总结</div>
+      </div>
+      <span class="card-arrow">→</span>
+    </a>
+  </div>
+</div>
+</body>
+</html>

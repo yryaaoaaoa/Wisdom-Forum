@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分类 · 智汇论坛</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c-bg: #f8fafc;
+    --c-bg-card: #ffffff;
+    --c-text: #1e293b;
+    --c-text-secondary: #64748b;
+    --c-text-muted: #94a3b8;
+    --c-border: #e2e8f0;
+    --c-border-light: #f1f5f9;
+    --c-primary: #0ea5e9;
+    --c-primary-hover: #38bdf8;
+    --c-primary-dark: #0284c7;
+    --font-display: 'Playfair Display', 'Noto Serif SC', 'Songti SC', Georgia, serif;
+    --font-body: 'Outfit', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --space-2xl: 48px;
+    --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-primary: 0 4px 14px rgba(14,165,233,0.15);
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.25s ease;
+    --transition-slow: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    --max-width: 1200px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-body);
+    background: var(--c-bg);
+    color: var(--c-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) 80px;
+  }
+
+  /* ─── Header ─── */
+  .page-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+  }
+  .page-header .badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--c-primary);
+    background: #f0f9ff;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    margin-bottom: var(--space-md);
+  }
+  .page-header h1 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--c-text);
+    letter-spacing: -0.02em;
+  }
+  .page-header .subtitle {
+    font-size: 15px;
+    color: var(--c-text-secondary);
+    margin-top: var(--space-xs);
+  }
+
+  /* ─── Featured ─── */
+  .featured-section {
+    margin-bottom: var(--space-2xl);
+  }
+  .featured-section .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--c-text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-md);
+  }
+
+  .featured-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-lg);
+  }
+
+  .featured-card {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--c-bg-card);
+    border: 1px solid var(--c-border);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .featured-card:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .featured-card .card-banner {
+    height: 120px;
+    background: linear-gradient(135deg, var(--banner-from), var(--banner-to));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .featured-card:first-child .card-banner {
+    height: 160px;
+  }
+
+  .featured-card .card-banner .banner-icon {
+    opacity: 0.15;
+    font-size: 80px;
+    position: absolute;
+    right: -10px;
+    bottom: -20px;
+  }
+
+  .featured-card .card-body {
+    padding: var(--space-lg);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .featured-card .card-body .card-name {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--c-text);
+    margin-bottom: 4px;
+  }
+
+  .featured-card:first-child .card-body .card-name {
+    font-size: 26px;
+  }
+
+  .featured-card .card-body .card-count {
+    font-size: 12px;
+    color: var(--c-text-muted);
+    font-family: var(--font-mono);
+    margin-bottom: var(--space-sm);
+  }
+
+  .featured-card .card-body .card-desc {
+    font-size: 13px;
+    color: var(--c-text-secondary);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .featured-card .card-body .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--c-border-light);
+  }
+
+  .featured-card .card-body .card-footer .latest {
+    font-size: 12px;
+    color: var(--c-text-muted);
+  }
+
+  .featured-card .card-body .card-footer .latest strong {
+    color: var(--c-text-secondary);
+    font-weight: 500;
+  }
+
+  .featured-card .card-body .card-footer .arrow {
+    font-size: 14px;
+    color: var(--c-border);
+    transition: all var(--transition-fast);
+  }
+
+  .featured-card:hover {
+    border-color: transparent;
+    box-shadow: var(--shadow-md), 0 4px 20px rgba(0,0,0,0.06);
+    transform: translateY(-3px);
+  }
+
+  .featured-card:hover .card-body .card-footer .arrow {
+    color: var(--c-primary);
+    transform: translateX(4px);
+  }
+
+  /* ─── Regular Grid ─── */
+  .regular-section .section-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--c-text-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: var(--space-md);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--c-border);
+  }
+
+  .regular-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: var(--space-md);
+  }
+
+  .regular-card {
+    background: var(--c-bg-card);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  .regular-card:hover {
+    border-color: var(--c-primary);
+    box-shadow: var(--shadow-primary);
+    transform: translateY(-2px);
+  }
+
+  .regular-card .rc-top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-sm);
+  }
+
+  .regular-card .rc-top .rc-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--c-border-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+
+  .regular-card .rc-top .rc-name {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--c-text);
+  }
+
+  .regular-card .rc-count {
+    font-size: 12px;
+    color: var(--c-text-muted);
+  }
+
+  .regular-card:hover .rc-name {
+    color: var(--c-primary);
+  }
+
+  /* ─── Responsive ─── */
+  @media (max-width: 768px) {
+    .featured-grid { grid-template-columns: 1fr; }
+    .featured-card:first-child { grid-column: 1; }
+    .regular-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="page-header">
+    <div class="badge">Categories</div>
+    <h1>探索分类</h1>
+    <p class="subtitle">按主题浏览，找到你感兴趣的技术领域</p>
+  </div>
+
+  <!-- Featured -->
+  <div class="featured-section">
+    <div class="section-label">热门分类</div>
+    <div class="featured-grid">
+      <a href="#" class="featured-card" style="--banner-from:#0ea5e9;--banner-to:#7dd3fc;">
+        <div class="card-banner">
+          <span style="color:#fff;font-size:40px;">☕</span>
+          <span class="banner-icon">☕</span>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Java</div>
+          <div class="card-count">12 篇文章 · 最新 2026-06-15</div>
+          <div class="card-desc">Java 核心语法、JVM 调优、并发编程、设计模式等核心内容</div>
+          <div class="card-footer">
+            <span class="latest">最近更新：<strong>深入理解 JVM 垃圾回收</strong></span>
+            <span class="arrow">→</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="featured-card" style="--banner-from:#16a34a;--banner-to:#86efac;">
+        <div class="card-banner">
+          <span style="color:#fff;font-size:36px;">🍃</span>
+          <span class="banner-icon">🍃</span>
+        </div>
+        <div class="card-body">
+          <div class="card-name">Spring Boot</div>
+          <div class="card-count">8 篇文章</div>
+          <div class="card-desc">Spring 全家桶、微服务架构、自动化配置与最佳实践</div>
+          <div class="card-footer">
+            <span class="latest">最近：<strong>Spring Boot 3.0 新特性</strong></span>
+            <span class="arrow">→</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="featured-card" style="--banner-from:#8b5cf6;--banner-to:#c4b5fd;">
+        <div class="card-banner">
+          <span style="color:#fff;font-size:36px;">⚛</span>
+          <span class="banner-icon">⚛</span>
+        </div>
+        <div class="card-body">
+          <div class="card-name">前端</div>
+          <div class="card-count">6 篇文章</div>
+          <div class="card-desc">Vue 3、React、TypeScript、CSS 等前端技术</div>
+          <div class="card-footer">
+            <span class="latest">最近：<strong>Vue 3 组合式 API 深入理解</strong></span>
+            <span class="arrow">→</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Regular -->
+  <div class="regular-section">
+    <div class="section-label">其他分类</div>
+    <div class="regular-grid">
+      <a href="#" class="regular-card">
+        <div class="rc-top">
+          <div class="rc-icon" style="background:#fffbeb;">🗄</div>
+          <div class="rc-name">数据库</div>
+        </div>
+        <div class="rc-count">5 篇文章</div>
+      </a>
+      <a href="#" class="regular-card">
+        <div class="rc-top">
+          <div class="rc-icon" style="background:#fef2f2;">🔧</div>
+          <div class="rc-name">DevOps</div>
+        </div>
+        <div class="rc-count">4 篇文章</div>
+      </a>
+      <a href="#" class="regular-card">
+        <div class="rc-top">
+          <div class="rc-icon" style="background:#ecfeff;">🏗</div>
+          <div class="rc-name">架构设计</div>
+        </div>
+        <div class="rc-count">3 篇文章</div>
+      </a>
+      <a href="#" class="regular-card">
+        <div class="rc-top">
+          <div class="rc-icon" style="background:#f5f3ff;">🧮</div>
+          <div class="rc-name">算法</div>
+        </div>
+        <div class="rc-count">3 篇文章</div>
+      </a>
+      <a href="#" class="regular-card">
+        <div class="rc-top">
+          <div class="rc-icon" style="background:#f5f5f4;">✍</div>
+          <div class="rc-name">随笔</div>
+        </div>
+        <div class="rc-count">2 篇文章</div>
+      </a>
+    </div>
+  </div>
+</div>
+</body>
+</html>

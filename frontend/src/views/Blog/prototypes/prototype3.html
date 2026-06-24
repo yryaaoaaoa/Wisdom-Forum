@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>分类文章 · 智汇论坛</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Outfit:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c-bg: #f8fafc;
+    --c-bg-card: #ffffff;
+    --c-text: #1e293b;
+    --c-text-secondary: #64748b;
+    --c-text-muted: #94a3b8;
+    --c-border: #e2e8f0;
+    --c-border-light: #f1f5f9;
+    --c-primary: #0ea5e9;
+    --c-primary-hover: #38bdf8;
+    --c-primary-dark: #0284c7;
+    --font-display: 'Playfair Display', 'Noto Serif SC', 'Songti SC', Georgia, serif;
+    --font-body: 'Outfit', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    --space-xs: 4px; --space-sm: 8px; --space-md: 16px; --space-lg: 24px; --space-xl: 32px; --space-2xl: 48px;
+    --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+    --shadow-primary: 0 4px 14px rgba(14,165,233,0.15);
+    --transition-fast: 0.15s ease;
+    --transition-base: 0.25s ease;
+    --max-width: 860px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-body);
+    background: var(--c-bg);
+    color: var(--c-text);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--space-2xl) var(--space-lg) 80px;
+  }
+
+  /* ─── Breadcrumb ─── */
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--c-text-muted);
+    margin-bottom: var(--space-md);
+  }
+  .breadcrumb a {
+    color: var(--c-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+  }
+  .breadcrumb a:hover { color: var(--c-primary); }
+  .breadcrumb .sep { color: var(--c-border); }
+
+  /* ─── Hero Section ─── */
+  .hero {
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-lg);
+    border-bottom: 2px solid var(--c-text);
+  }
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: 36px;
+    font-weight: 900;
+    color: var(--c-text);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    margin-bottom: var(--space-sm);
+  }
+  .hero h1 .accent { color: var(--c-primary); }
+  .hero .meta-line {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    font-size: 14px;
+    color: var(--c-text-secondary);
+  }
+  .hero .meta-line .count {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--c-primary);
+    font-weight: 600;
+    background: var(--c-border-light);
+    padding: 2px 12px;
+    border-radius: 20px;
+  }
+
+  /* ─── Category selector ─── */
+  .category-selector {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-xl);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--c-border);
+    flex-wrap: wrap;
+  }
+  .selector-label {
+    font-size: 12px;
+    color: var(--c-text-muted);
+    font-weight: 500;
+    margin-right: var(--space-sm);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .selector-item {
+    padding: 5px 13px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--c-text-secondary);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all var(--transition-fast);
+  }
+  .selector-item:hover {
+    background: var(--c-border-light);
+    color: var(--c-text);
+  }
+  .selector-item.active {
+    background: var(--c-border);
+    color: var(--c-text);
+    font-weight: 600;
+  }
+  .selector-item .s-count {
+    font-size: 11px;
+    color: var(--c-text-muted);
+    margin-left: 3px;
+  }
+
+  /* ─── Article List ─── */
+  .article-list { display: flex; flex-direction: column; }
+  .article-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-lg);
+    padding: var(--space-lg) 0;
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid var(--c-border-light);
+    transition: all var(--transition-fast);
+  }
+  .article-item:last-child { border-bottom: none; }
+  .article-item:hover .article-title { color: var(--c-primary); }
+
+  .article-index {
+    flex-shrink: 0;
+    width: 32px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--c-text-muted);
+    text-align: right;
+  }
+
+  .article-body { flex: 1; min-width: 0; }
+  .article-meta {
+    display: flex; align-items: center; gap: var(--space-sm);
+    font-size: 12px; color: var(--c-text-muted);
+    margin-bottom: 4px;
+  }
+  .article-meta .date { font-family: var(--font-mono); font-size: 12px; }
+  .article-title {
+    font-family: var(--font-display);
+    font-size: 19px; font-weight: 700;
+    color: var(--c-text);
+    line-height: 1.35;
+    margin-bottom: 4px;
+    transition: color var(--transition-fast);
+  }
+  .article-summary {
+    font-size: 14px; color: var(--c-text-secondary);
+    line-height: 1.6;
+    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .article-stats {
+    flex-shrink: 0;
+    display: flex;
+    gap: var(--space-md);
+    font-size: 12px;
+    color: var(--c-text-muted);
+    text-align: right;
+  }
+  .article-stats span { display: block; }
+
+  .article-item:hover {
+    padding-left: var(--space-sm);
+    padding-right: var(--space-sm);
+  }
+
+  /* ─── Pagination ─── */
+  .pagination {
+    display: flex; align-items: center; justify-content: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-xl);
+    padding-top: var(--space-lg);
+  }
+  .pagination a {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 36px; height: 36px;
+    font-size: 13px; font-weight: 500;
+    color: var(--c-text-secondary);
+    text-decoration: none;
+    border-radius: var(--radius-sm);
+    transition: all var(--transition-fast);
+  }
+  .pagination a:hover { background: var(--c-border-light); color: var(--c-text); }
+  .pagination a.active { background: var(--c-primary); color: #fff; }
+
+  @media (max-width: 640px) {
+    .article-stats { display: none; }
+    .article-index { display: none; }
+    .hero h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="breadcrumb">
+    <a href="#">首页</a>
+    <span class="sep">/</span>
+    <span>分类</span>
+    <span class="sep">/</span>
+    <span style="color:var(--c-text-secondary);font-weight:500;">Java</span>
+  </div>
+
+  <div class="hero">
+    <h1>Java <span class="accent">·</span></h1>
+    <div class="meta-line">
+      <span class="count">12 篇</span>
+      <span>涵盖 JVM、并发编程、Spring 等核心技术</span>
+    </div>
+  </div>
+
+  <div class="category-selector">
+    <span class="selector-label">分类</span>
+    <a href="#" class="selector-item">全部 <span class="s-count">43</span></a>
+    <a href="#" class="selector-item active">Java <span class="s-count">12</span></a>
+    <a href="#" class="selector-item">Spring Boot <span class="s-count">8</span></a>
+    <a href="#" class="selector-item">前端 <span class="s-count">6</span></a>
+    <a href="#" class="selector-item">数据库 <span class="s-count">5</span></a>
+    <a href="#" class="selector-item">DevOps <span class="s-count">4</span></a>
+    <a href="#" class="selector-item">架构设计 <span class="s-count">3</span></a>
+    <a href="#" class="selector-item">算法 <span class="s-count">3</span></a>
+    <a href="#" class="selector-item">随笔 <span class="s-count">2</span></a>
+  </div>
+
+  <div class="article-list">
+    <a href="#" class="article-item">
+      <span class="article-index">01</span>
+      <div class="article-body">
+        <div class="article-meta">
+          <span class="date">2026-06-15</span>
+        </div>
+        <h3 class="article-title">深入理解 JVM 垃圾回收机制与调优实践</h3>
+        <p class="article-summary">从 GC 算法原理出发，结合实际案例讲解如何分析和优化 GC 性能，包括 CMS、G1、ZGC 等主流收集器的选型建议。</p>
+      </div>
+      <div class="article-stats">
+        <span>👁 1,284</span>
+        <span>❤ 56</span>
+      </div>
+    </a>
+    <a href="#" class="article-item">
+      <span class="article-index">02</span>
+      <div class="article-body">
+        <div class="article-meta">
+          <span class="date">2026-06-10</span>
+        </div>
+        <h3 class="article-title">Java Stream API 实战：从函数式编程到高效数据处理</h3>
+        <p class="article-summary">通过大量实战例子，深入浅出地讲解 Stream 的创建、中间操作、终止操作以及并行流的正确使用方式。</p>
+      </div>
+      <div class="article-stats">
+        <span>👁 2,156</span>
+        <span>❤ 89</span>
+      </div>
+    </a>
+    <a href="#" class="article-item">
+      <span class="article-index">03</span>
+      <div class="article-body">
+        <div class="article-meta">
+          <span class="date">2026-06-03</span>
+        </div>
+        <h3 class="article-title">Java 并发编程从入门到精通：线程池源码解析</h3>
+        <p class="article-summary">深度剖析 ThreadPoolExecutor 的源码实现，详解核心线程数、任务队列、拒绝策略等关键参数的调优方法。</p>
+      </div>
+      <div class="article-stats">
+        <span>👁 967</span>
+        <span>❤ 42</span>
+      </div>
+    </a>
+    <a href="#" class="article-item">
+      <span class="article-index">04</span>
+      <div class="article-body">
+        <div class="article-meta">
+          <span class="date">2026-05-28</span>
+        </div>
+        <h3 class="article-title">Spring AOP 原理与实战：构建自己的日志切面框架</h3>
+        <p class="article-summary">从 JDK 动态代理和 CGLIB 代理原理说起，手把手实现一个生产级别的日志切面框架。</p>
+      </div>
+      <div class="article-stats">
+        <span>👁 1,523</span>
+        <span>❤ 67</span>
+      </div>
+    </a>
+    <a href="#" class="article-item">
+      <span class="article-index">05</span>
+      <div class="article-body">
+        <div class="article-meta">
+          <span class="date">2026-05-20</span>
+        </div>
+        <h3 class="article-title">MyBatis 插件机制详解：从拦截器到分页插件</h3>
+        <p class="article-summary">深入分析 MyBatis 四大对象的工作原理，以及如何编写高性能的拦截器插件。</p>
+      </div>
+      <div class="article-stats">
+        <span>👁 789</span>
+        <span>❤ 31</span>
+      </div>
+    </a>
+    <a href="#" class="article-item">
+      <span class="article-index">06</span>
+      <div class="article-body">
+        <div class="article-meta">
+          <span class="date">2026-05-15</span>
+        </div>
+        <h3 class="article-title">Java 设计模式实战：策略模式在业务系统中的妙用</h3>
+        <p class="article-summary">通过一个实际的业务场景，展示策略模式如何让代码更优雅、更易维护。</p>
+      </div>
+      <div class="article-stats">
+        <span>👁 634</span>
+        <span>❤ 23</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="pagination">
+    <a href="#">‹</a>
+    <a href="#" class="active">1</a>
+    <a href="#">2</a>
+    <a href="#">⋯</a>
+    <a href="#">12</a>
+    <a href="#">›</a>
+  </div>
+</div>
+</body>
+</html>

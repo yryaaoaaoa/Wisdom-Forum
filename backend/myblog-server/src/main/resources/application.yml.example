@@ -1,0 +1,109 @@
+server:
+  port: 8088
+
+cors:
+  allowed-origins: "*"
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.messaging: DEBUG
+    org.springframework.messaging.simp: DEBUG
+    org.springframework.web.socket: DEBUG
+    com.yry.blog.myblogcommon.config.SqlTimeInterceptor: DEBUG
+
+minio:
+  endpoint: http://localhost:9000
+  access-key: your-minio-access-key
+  secret-key: your-minio-secret-key
+  bucket-name: my-bucket
+
+forum:
+  hot:
+    post:
+      access-10min: 30
+      access-1h: 100
+
+rocketmq:
+  name-server: your-rocketmq-server:9876
+  producer:
+    group: like-db-producer-sync-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+  consumer:
+    group: like-db-consumer-sync-group
+    consume-thread-max: 20
+    consume-message-batch-max-size: 1
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+  websocket:
+    stomp:
+      enabled: true
+      broker-relay:
+        simple-broker: /topic, /queue
+        user-destination-prefix: /user
+        application-destination-prefixes: /app
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:8858
+        port: 8719
+      eager: true
+  jwt:
+    issuer: your-company
+    secret: your-jwt-secret-at-least-256-bit
+    tokenExpireTime: 3600000
+    refreshExpireTime: 360000000
+    tokenHeaderKey: Authorization
+    tokenPrefix: Bearer
+  security:
+    user:
+      name: admin
+      password: "{noop}your-admin-password"
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/myblog?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: your-db-username
+    password: your-db-password
+  data:
+    elasticsearch:
+      client:
+        rest:
+          uris: http://localhost:9200
+      repositories:
+        enabled: true
+    redis:
+      host: localhost
+      port: 6379
+      password: your-redis-password
+      timeout: 2000ms
+  mail:
+    host: smtp.qq.com
+    port: 587
+    username: your-email@qq.com
+    password: your-email-auth-code
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+app:
+  name: 智汇论坛
+  password-reset-url: http://localhost:5173/reset-password
+
+elasticsearch:
+  enabled: true
+  host: localhost
+  port: 9200
+  scheme: https
+  username: elastic
+  password: your-es-password
+  connection-timeout: 5000
+  socket-timeout: 30000
