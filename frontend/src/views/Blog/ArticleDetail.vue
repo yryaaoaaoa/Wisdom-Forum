@@ -169,12 +169,18 @@ const fetchArticle = async () => {
   loading.value = true
   try {
     const id = route.params.id
+    if (!id) {
+      ElMessage.error('文章ID不存在')
+      return
+    }
     const res = await getArticleById(id)
-    if (res.data.code === 200) {
+    if (res.data.code === 200 && res.data.data) {
       article.value = res.data.data
       fetchLikeStatus()
       fetchLikeCount()
       fetchRelatedArticles()
+    } else {
+      ElMessage.error(res.data.msg || '文章不存在或已删除')
     }
   } catch (error) {
     console.error('获取文章失败:', error)

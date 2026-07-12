@@ -105,8 +105,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         UpdateWrapper<User> updateWrapper = new UpdateWrapper<>();
         updateWrapper.eq("id", id)
                 .set("nickname", dto.getNickname())
-                .set("email", dto.getEmail())
-                .set("avatar_url", dto.getAvatarUrl());
+                .set("email", dto.getEmail());
+        if (dto.getAvatarUrl() != null) {
+            updateWrapper.set("avatar_url", dto.getAvatarUrl());
+        }
         if (dto.getEnabled() != null) {
             updateWrapper.set("enabled", dto.getEnabled());
         }

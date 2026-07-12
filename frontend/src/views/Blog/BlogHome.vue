@@ -225,7 +225,8 @@ const fetchArticles = async () => {
       // 无关键词时走 MySQL 分页查询
       const params = {
         current: currentPage.value,
-        size: pageSize.value
+        size: pageSize.value,
+        status: 1
       }
       if (activeCategory.value) {
         params.categoryId = activeCategory.value

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.server.ResponseStatusException;
@@ -66,6 +67,12 @@ public class GlobalExceptionHandler {
     public Response<String> handleNoSuchElement(NoSuchElementException ex) {
         log.warn("资源未找到: {}", ex.getMessage());
         return Response.error(ResponseCodeEnums.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public Response<String> handleMissingParam(MissingServletRequestParameterException ex) {
+        log.warn("缺少请求参数: {}", ex.getMessage());
+        return Response.error(ResponseCodeEnums.BAD_REQUEST, "缺少必要参数: " + ex.getParameterName());
     }
 
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)

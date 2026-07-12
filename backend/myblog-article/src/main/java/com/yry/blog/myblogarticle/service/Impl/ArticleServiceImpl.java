@@ -238,6 +238,8 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     .createdAt(cacheArticle.getCreatedAt())
                     .updatedAt(cacheArticle.getUpdatedAt())
                     .build();
+            resultArticle.setAuthName(cacheArticle.getAuthName());
+            resultArticle.setAuthAvatar(cacheArticle.getAuthAvatar());
             return Response.success(resultArticle);
         }
 
@@ -260,10 +262,12 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> impl
                     .createdAt(article.getCreatedAt())
                     .updatedAt(article.getUpdatedAt())
                     .build();
+            resultArticle.setAuthName(article.getAuthName());
+            resultArticle.setAuthAvatar(article.getAuthAvatar());
             return Response.success(resultArticle);
         }
 
-        return Response.success(article);
+        return Response.error(ResponseCodeEnums.NOT_FOUND, "文章不存在");
     }
 
     @Override
