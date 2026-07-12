@@ -1,6 +1,8 @@
 package com.yry.blog.myblogauth.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.yry.blog.myblogauth.dto.PermissionCreateDTO;
+import com.yry.blog.myblogauth.dto.PermissionUpdateDTO;
 import com.yry.blog.myblogcommon.entity.Permission.Permission;
 
 import java.util.List;
@@ -46,17 +48,18 @@ public interface PermissionService extends IService<Permission> {
 
     /**
      * 创建新权限
-     * @param permission 权限对象
+     * @param dto 权限创建参数
      * @return 创建后的权限对象
      */
-    Permission createPermission(Permission permission);
+    Permission createPermission(PermissionCreateDTO dto);
 
     /**
      * 更新权限信息
-     * @param permission 权限对象
+     * @param id 权限ID
+     * @param dto 权限更新参数
      * @return 更新后的权限对象
      */
-    Permission updatePermission(Permission permission);
+    Permission updatePermission(Long id, PermissionUpdateDTO dto);
 
     /**
      * 删除权限

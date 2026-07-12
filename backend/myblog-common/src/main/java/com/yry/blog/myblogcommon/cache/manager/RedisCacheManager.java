@@ -1,7 +1,8 @@
 package com.yry.blog.myblogcommon.cache.manager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
@@ -17,9 +18,12 @@ import java.util.concurrent.TimeUnit;
 public class RedisCacheManager {
 
     private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
 
-    public RedisCacheManager(RedisTemplate<String, Object> redisTemplate) {
+    public RedisCacheManager(RedisTemplate<String, Object> redisTemplate,
+                             @Qualifier("redisObjectMapper") ObjectMapper objectMapper) {
         this.redisTemplate = redisTemplate;
+        this.objectMapper = objectMapper;
     }
 
     // --- String/Value Operations ---
@@ -50,8 +54,11 @@ public class RedisCacheManager {
             return null;
         }
         try {
+            if (value instanceof java.util.LinkedHashMap) {
+                return objectMapper.convertValue(value, clazz);
+            }
             return clazz.cast(value);
-        } catch (ClassCastException e) {
+        } catch (Exception e) {
             log.error("Redis值类型转换失败，key:{}, targetClass:{}", key, clazz.getName(), e);
             return null;
         }
@@ -133,8 +140,11 @@ public class RedisCacheManager {
             return null;
         }
         try {
+            if (value instanceof java.util.LinkedHashMap) {
+                return objectMapper.convertValue(value, clazz);
+            }
             return clazz.cast(value);
-        } catch (ClassCastException e) {
+        } catch (Exception e) {
             log.error("Redis Hash值类型转换失败，key:{}, hashKey:{}, targetClass:{}", key, hashKey, clazz.getName(), e);
             return null;
         }
@@ -565,17 +575,12 @@ public class RedisCacheManager {
                 continue;
             }
             try {
-                // 核心修复：将LinkedHashMap转换为目标实体类
                 if (value instanceof java.util.LinkedHashMap) {
-                    // 先将LinkedHashMap序列化为JSON字符串
-                    T targetObj = clazz.getDeclaredConstructor().newInstance();
-                    // 再反序列化为目标实体类
-                    BeanUtils.copyProperties(value, targetObj);
-                    result.add(targetObj);
+                    result.add(objectMapper.convertValue(value, clazz));
                 } else {
                     result.add(clazz.cast(value));
                 }
-            } catch (Exception e) { // 包含反射异常、类型转换异常等
+            } catch (Exception e) {
                 log.error("Redis批量值类型转换失败，value:{}, targetClass:{}", value, clazz.getName(), e);
                 result.add(null);
             }

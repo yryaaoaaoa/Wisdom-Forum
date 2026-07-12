@@ -1,7 +1,11 @@
 package com.yry.blog.myblogadmin.controller;
 
+import com.yry.blog.myblogadmin.vo.PermissionVO;
+import com.yry.blog.myblogauth.dto.PermissionCreateDTO;
+import com.yry.blog.myblogauth.dto.PermissionUpdateDTO;
 import com.yry.blog.myblogcommon.annotation.RequiresPermission;
 import com.yry.blog.myblogcommon.entity.Permission.Permission;
+import com.yry.blog.myblogcommon.enums.ResponseCodeEnums;
 import com.yry.blog.myblogcommon.result.Response;
 import com.yry.blog.myblogauth.service.PermissionService;
 import org.springframework.web.bind.annotation.*;
@@ -20,34 +24,34 @@ public class PermissionController {
 
     @RequiresPermission("permission:view")
     @GetMapping
-    public Response<List<Permission>> getAllPermissions() {
+    public Response<List<PermissionVO>> getAllPermissions() {
         List<Permission> permissions = permissionService.getAllPermissions();
-        return Response.success(permissions);
+        List<PermissionVO> vos = permissions.stream().map(this::toVO).toList();
+        return Response.success(vos);
     }
 
     @RequiresPermission("permission:view")
     @GetMapping("/{id}")
-    public Response<Permission> getPermissionById(@PathVariable Long id) {
+    public Response<PermissionVO> getPermissionById(@PathVariable Long id) {
         Permission permission = permissionService.getPermissionById(id);
         if (permission == null) {
-            return Response.error(com.yry.blog.myblogcommon.enums.ResponseCodeEnums.NOT_FOUND, "权限不存在");
+            return Response.error(ResponseCodeEnums.NOT_FOUND, "权限不存在");
         }
-        return Response.success(permission);
+        return Response.success(toVO(permission));
     }
 
     @RequiresPermission("permission:create")
     @PostMapping
-    public Response<Permission> createPermission(@RequestBody Permission permission) {
-        Permission created = permissionService.createPermission(permission);
-        return Response.success(created);
+    public Response<PermissionVO> createPermission(@RequestBody PermissionCreateDTO dto) {
+        Permission created = permissionService.createPermission(dto);
+        return Response.success(toVO(created));
     }
 
     @RequiresPermission("permission:update")
     @PutMapping("/{id}")
-    public Response<Permission> updatePermission(@PathVariable Long id, @RequestBody Permission permission) {
-        permission.setId(id);
-        Permission updated = permissionService.updatePermission(permission);
-        return Response.success(updated);
+    public Response<PermissionVO> updatePermission(@PathVariable Long id, @RequestBody PermissionUpdateDTO dto) {
+        Permission updated = permissionService.updatePermission(id, dto);
+        return Response.success(toVO(updated));
     }
 
     @RequiresPermission("permission:delete")
@@ -55,5 +59,14 @@ public class PermissionController {
     public Response<Object> deletePermission(@PathVariable Long id) {
         permissionService.deletePermission(id);
         return Response.success(id);
+    }
+
+    private PermissionVO toVO(Permission p) {
+        PermissionVO vo = new PermissionVO();
+        vo.setId(p.getId());
+        vo.setCode(p.getCode());
+        vo.setName(p.getName());
+        vo.setCreateTime(p.getCreateTime());
+        return vo;
     }
 }

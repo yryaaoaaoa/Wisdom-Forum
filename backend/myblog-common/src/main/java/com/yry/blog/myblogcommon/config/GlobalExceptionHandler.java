@@ -14,6 +14,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.NoSuchElementException;
@@ -87,6 +88,12 @@ public class GlobalExceptionHandler {
         log.warn("响应状态异常: status={}, reason={}", ex.getStatusCode(), ex.getReason());
         ResponseCodeEnums error = ResponseCodeEnums.getByCode(ex.getStatusCode().value());
         return error != null ? Response.error(error) : Response.error(ResponseCodeEnums.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public Response<String> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        log.warn("参数类型转换失败: {}，值: {}，期望类型: {}", ex.getName(), ex.getValue(), ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "未知");
+        return Response.error(ResponseCodeEnums.BAD_REQUEST, "参数格式错误: " + ex.getValue());
     }
 
     @ExceptionHandler(Exception.class)

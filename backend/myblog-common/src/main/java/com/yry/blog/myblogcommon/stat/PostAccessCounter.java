@@ -3,10 +3,13 @@ package com.yry.blog.myblogcommon.stat;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -21,10 +24,10 @@ public class PostAccessCounter {
 
     private final Cache<String, AtomicInteger> localAccessCache;
 
-    @Autowired
-    private RedisTemplate<String, Integer> redisTemplate;
+    private final StringRedisTemplate redisTemplate;
 
-    public PostAccessCounter() {
+    public PostAccessCounter(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
         this.localAccessCache = Caffeine.newBuilder()
                 .expireAfterWrite(1, TimeUnit.MINUTES)
                 .maximumSize(10000)
@@ -90,16 +93,25 @@ public class PostAccessCounter {
     }
 
     public Long getTotalReadCount() {
-        Set<String> keys = redisTemplate.keys(READ_COUNT_KEY_PREFIX + "*");
+        Set<String> keys = redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
+            Set<String> matchedKeys = new HashSet<>();
+            try (Cursor<byte[]> cursor = connection.scan(
+                    ScanOptions.scanOptions().match(READ_COUNT_KEY_PREFIX + "*").count(100).build())) {
+                cursor.forEachRemaining(key -> matchedKeys.add(new String(key)));
+            } catch (Exception e) {
+                log.error("SCAN article read count keys failed", e);
+            }
+            return matchedKeys;
+        });
         if (keys == null || keys.isEmpty()) {
             return 0L;
         }
 
         long total = 0L;
         for (String key : keys) {
-            Integer count = redisTemplate.opsForValue().get(key);
+            String count = redisTemplate.opsForValue().get(key);
             if (count != null) {
-                total += count;
+                total += Long.parseLong(count);
             }
         }
         return total;
@@ -107,8 +119,8 @@ public class PostAccessCounter {
 
     public int getReadCountIncrement(String postId) {
         String key = READ_COUNT_KEY_PREFIX + postId;
-        Integer count = redisTemplate.opsForValue().get(key);
-        return count == null ? 0 : count;
+        String count = redisTemplate.opsForValue().get(key);
+        return count == null ? 0 : Integer.parseInt(count);
     }
 
     public String getReadCountKeyPrefix() {
@@ -136,7 +148,7 @@ public class PostAccessCounter {
     }
 
     private int getRedisCount(String redisKey) {
-        Integer count = redisTemplate.opsForValue().get(redisKey);
-        return count == null ? 0 : count;
+        String count = redisTemplate.opsForValue().get(redisKey);
+        return count == null ? 0 : Integer.parseInt(count);
     }
 }

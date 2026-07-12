@@ -2,6 +2,8 @@ package com.yry.blog.myblogauth.service.Impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.yry.blog.myblogauth.dto.PermissionCreateDTO;
+import com.yry.blog.myblogauth.dto.PermissionUpdateDTO;
 import com.yry.blog.myblogauth.service.PermissionService;
 import com.yry.blog.myblogcommon.entity.Permission.Permission;
 import com.yry.blog.myblogauth.mapper.PermissionMapper;
@@ -84,15 +86,20 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
     }
 
     @Override
-    public Permission createPermission(Permission permission) {
-        // 向permission表插入新权限
+    public Permission createPermission(PermissionCreateDTO dto) {
+        Permission permission = new Permission();
+        permission.setCode(dto.getCode());
+        permission.setName(dto.getName());
         permissionMapper.insert(permission);
         return permission;
     }
 
     @Override
-    public Permission updatePermission(Permission permission) {
-        // 更新permission表中的权限信息
+    public Permission updatePermission(Long id, PermissionUpdateDTO dto) {
+        Permission permission = new Permission();
+        permission.setId(id);
+        permission.setCode(dto.getCode());
+        permission.setName(dto.getName());
         permissionMapper.updateById(permission);
         return permission;
     }

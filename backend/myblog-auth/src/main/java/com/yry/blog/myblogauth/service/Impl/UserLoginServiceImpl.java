@@ -15,7 +15,6 @@ import com.yry.blog.myblogauth.jwt.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,7 +28,6 @@ import static com.yry.blog.myblogcommon.enums.ResponseCodeEnums.*;
 @Service
 @RequiredArgsConstructor // Lombok自动生成构造函数
 public class UserLoginServiceImpl implements UserLoginService {
-    private final RedisTemplate<Object, Object> redisTemplate;
     @Value("${spring.jwt.refreshExpireTime}") long refreshExpirationMs;
     private final UserAuthMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -112,7 +110,7 @@ public class UserLoginServiceImpl implements UserLoginService {
 
             if (username != null) {
                 // 删除 Refresh Token
-                redisTemplate.delete(refreshRedisKey);
+                redisCacheManager.evict(refreshRedisKey);
 
                 // 删除用户关联的 Refresh Token 记录
                 String userRefreshTokensKey = "user:refresh_tokens:" + username;

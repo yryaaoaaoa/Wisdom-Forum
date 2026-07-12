@@ -3,6 +3,7 @@ package com.yry.blog.myblogauth.auth.Impl;
 import com.yry.blog.myblogauth.auth.AuthService;
 import com.yry.blog.myblogauth.dto.TokenRefreshResponseDTO;
 import com.yry.blog.myblogauth.jwt.JwtUtils;
+import com.yry.blog.myblogauth.service.PermissionService;
 import com.yry.blog.myblogcommon.cache.manager.RedisCacheManager;
 import com.yry.blog.myblogcommon.exception.BusinessException;
 import io.jsonwebtoken.Claims;
@@ -26,6 +27,9 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private RedisCacheManager redisCacheManager;
 
+    @Autowired
+    private PermissionService permissionService;
+
     @Value("${spring.jwt.refreshExpireTime}") int refreshExpirationMs;
 
 
@@ -45,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
         } else {
             throw new BusinessException(METHOD_NOT_ALLOWED);
         }
-        List<String> permissions = jwtUtil.extractPermissions(refreshToken);
+        List<String> permissions = permissionService.getPermissionCodesByUserId(userId);
 
         String redisKey = "refresh_token:" + refreshToken;
         String storedUsername = (String) redisCacheManager.get(redisKey);

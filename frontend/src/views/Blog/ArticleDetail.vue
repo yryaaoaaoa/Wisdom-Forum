@@ -4,7 +4,11 @@
       <div v-if="loading" class="loading-container">
         <el-skeleton :rows="10" animated />
       </div>
-      
+
+      <div v-else-if="!articleExists" class="not-found">
+        <el-empty description="文章不存在" />
+      </div>
+
       <article v-else class="article-container">
         <header class="article-header">
           <h1 class="article-title">{{ article.title }}</h1>
@@ -30,7 +34,7 @@
           </div>
         </header>
         
-        <div class="article-content">
+        <div class="article-content" @click="handleContentClick">
           <MdPreview :editorId="articlePreviewId" :modelValue="article.content" />
         </div>
         
@@ -82,7 +86,7 @@
                 </div>
                 <p class="comment-text">{{ comment.content }}</p>
                 <div class="comment-actions">
-                  <el-button link size="small" @click="likeComment(comment.id)">
+                  <el-button link size="small" @click="likeComment(comment.id)" :type="likedComments.has(comment.id) ? 'primary' : ''">
                     <el-icon><Star /></el-icon> {{ comment.likeCount || 0 }}
                   </el-button>
                   <el-button link size="small" @click="replyComment(comment)">
@@ -101,7 +105,7 @@
                       </div>
                       <p class="comment-text">{{ reply.content }}</p>
                       <div class="comment-actions">
-                        <el-button link size="small" @click="likeComment(reply.id)">
+                        <el-button link size="small" @click="likeComment(reply.id)" :type="likedComments.has(reply.id) ? 'primary' : ''">
                           <el-icon><Star /></el-icon> {{ reply.likeCount || 0 }}
                         </el-button>
                       </div>
@@ -155,8 +159,10 @@ const route = useRoute()
 const router = useRouter()
 
 const loading = ref(true)
+const articleExists = ref(false)
 const article = ref({})
 const comments = ref([])
+const likedComments = ref(new Set())
 const newComment = ref('')
 const submitting = ref(false)
 const isLiked = ref(false)
@@ -169,22 +175,26 @@ const fetchArticle = async () => {
   loading.value = true
   try {
     const id = route.params.id
-    if (!id) {
-      ElMessage.error('文章ID不存在')
+    if (!id || !/^\d+$/.test(id)) {
+      loading.value = false
+      articleExists.value = false
       return
     }
     const res = await getArticleById(id)
     if (res.data.code === 200 && res.data.data) {
+      articleExists.value = true
       article.value = res.data.data
       fetchLikeStatus()
       fetchLikeCount()
       fetchRelatedArticles()
     } else {
+      articleExists.value = false
       ElMessage.error(res.data.msg || '文章不存在或已删除')
     }
   } catch (error) {
     console.error('获取文章失败:', error)
     ElMessage.error('文章加载失败')
+    articleExists.value = false
   } finally {
     loading.value = false
   }
@@ -231,7 +241,9 @@ const fetchLikeCount = async () => {
 
 const fetchComments = async () => {
   try {
-    const res = await getArticleComments(route.params.id)
+    const id = route.params.id
+    if (!id || !/^\d+$/.test(id)) return
+    const res = await getArticleComments(id)
     if (res.data.code === 200) {
       comments.value = res.data.data || []
     }
@@ -302,6 +314,17 @@ const submitComment = async () => {
   }
 }
 
+const updateCommentCount = (list, targetId, delta) => {
+  for (const c of list) {
+    if (c.id === targetId) {
+      c.likeCount = (c.likeCount || 0) + delta
+      return true
+    }
+    if (c.children && updateCommentCount(c.children, targetId, delta)) return true
+  }
+  return false
+}
+
 const likeComment = async (commentId) => {
   if (!localStorage.getItem('access_token')) {
     ElMessage.warning('请先登录')
@@ -310,20 +333,42 @@ const likeComment = async (commentId) => {
   }
 
   try {
-    await likeArticleOrComment(commentId, 2)
-    ElMessage.success('点赞成功')
-    fetchComments()
+    const res = await likeArticleOrComment(commentId, 2)
+    if (res.data.code === 200) {
+      if (res.data.data) {
+        likedComments.value.add(commentId)
+        updateCommentCount(comments.value, commentId, 1)
+        ElMessage.success('点赞成功')
+      } else {
+        likedComments.value.delete(commentId)
+        updateCommentCount(comments.value, commentId, -1)
+        ElMessage.success('取消点赞')
+      }
+      likedComments.value = new Set(likedComments.value)
+    } else {
+      ElMessage.error(res.data.msg || '操作失败')
+    }
   } catch (error) {
     console.error('点赞失败:', error)
+    ElMessage.error('点赞失败')
   }
 }
 
 const replyComment = (comment) => {
-  newComment.value = `@${comment.username} `
+  newComment.value = `@${comment.nickname} `
 }
 
 const goToArticle = (id) => {
   router.push(`/blog/article/${id}`)
+}
+
+const handleContentClick = (e) => {
+  const link = e.target.closest('a')
+  if (!link) return
+  const href = link.getAttribute('href')
+  if (href && href.endsWith('.md')) {
+    e.preventDefault()
+  }
 }
 
 const formatDate = (date) => {
@@ -648,5 +693,13 @@ onMounted(() => {
   background: var(--c-bg-card);
   border-radius: var(--radius-md);
   padding: 32px;
+}
+
+.not-found {
+  background: var(--c-bg-card);
+  border-radius: var(--radius-md);
+  padding: 80px 32px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--c-border);
 }
 </style>

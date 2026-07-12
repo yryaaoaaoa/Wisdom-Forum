@@ -1,12 +1,12 @@
 package com.yry.blog.myblogadmin.controller;
 
+import com.yry.blog.myblogadmin.vo.PermissionVO;
 import com.yry.blog.myblogauth.dto.RoleCreateDTO;
 import com.yry.blog.myblogauth.service.PermissionService;
 import com.yry.blog.myblogauth.service.RoleService;
 import com.yry.blog.myblogauth.vo.RoleVO;
 import com.yry.blog.myblogcommon.annotation.RequiresPermission;
 import com.yry.blog.myblogcommon.entity.Permission.Permission;
-import com.yry.blog.myblogcommon.entity.Role.Role;
 import com.yry.blog.myblogcommon.result.Response;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,8 +75,16 @@ public class RoleController {
 
     @RequiresPermission("role:view")
     @GetMapping("/permissions/all")
-    public Response<List<Permission>> getAllPermissions() {
+    public Response<List<PermissionVO>> getAllPermissions() {
         List<Permission> permissions = permissionService.getAllPermissions();
-        return Response.success(permissions);
+        List<PermissionVO> vos = permissions.stream().map(p -> {
+            PermissionVO vo = new PermissionVO();
+            vo.setId(p.getId());
+            vo.setCode(p.getCode());
+            vo.setName(p.getName());
+            vo.setCreateTime(p.getCreateTime());
+            return vo;
+        }).toList();
+        return Response.success(vos);
     }
 }

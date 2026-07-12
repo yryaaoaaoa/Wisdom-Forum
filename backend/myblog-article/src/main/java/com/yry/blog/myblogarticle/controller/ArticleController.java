@@ -19,7 +19,6 @@ import com.yry.blog.myblogcommon.entity.article.Article;
 import com.yry.blog.myblogcommon.result.PaginationResponse;
 import com.yry.blog.myblogcommon.result.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -33,7 +32,6 @@ import java.util.Map;
  * @date （可补充创建日期）
  */
 @RestController
-@Controller
 @RequestMapping("/api/articles")
 public class ArticleController {
 
