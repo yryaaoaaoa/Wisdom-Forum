@@ -1,6 +1,6 @@
 package com.yry.blog.myblogarticle.service.Impl;
 
-import com.yry.blog.myblogadmin.auth.Impl.PermissionCheckerImpl;
+import com.yry.blog.myblogcommon.auth.PermissionChecker;
 import com.yry.blog.myblogarticle.dto.AddCommentDTO;
 import com.yry.blog.myblogarticle.mapper.CommentMapper;
 import com.yry.blog.myblogarticle.service.CommentService;
@@ -24,7 +24,7 @@ public class CommentServiceImpl implements CommentService {
     @Autowired
     private CommentMapper commentMapper;
     @Autowired
-    private PermissionCheckerImpl permissionChecker;
+    private PermissionChecker permissionChecker;
     @Override
     public Response<List<CommentVO>> getArticleComments(Long articleId){
         // 1. 获取指定文章的所有评论（包括回复）

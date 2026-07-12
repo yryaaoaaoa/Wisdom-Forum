@@ -27,6 +27,7 @@
         <module>myblog-article</module>
         <module>myblog-server</module>
         <module>myblog-websocket</module>
+        <module>myblog-auth</module>
     </modules>
 
     <!-- 仓库配置：确保依赖能正常下载 -->
@@ -161,6 +162,11 @@
             <dependency>
                 <groupId>com.yry.blog</groupId>
                 <artifactId>myblog-websocket</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.yry.blog</groupId>
+                <artifactId>myblog-auth</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

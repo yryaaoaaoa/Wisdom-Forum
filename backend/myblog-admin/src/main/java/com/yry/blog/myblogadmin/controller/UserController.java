@@ -1,8 +1,11 @@
 package com.yry.blog.myblogadmin.controller;
 
-import com.yry.blog.myblogadmin.dto.*;
-import com.yry.blog.myblogadmin.service.UserLoginService;
-import com.yry.blog.myblogadmin.service.UserService;
+import com.yry.blog.myblogadmin.dto.UserQueryDTO;
+import com.yry.blog.myblogadmin.dto.UserUpdateDTO;
+import com.yry.blog.myblogauth.dto.UserPasswordResetDTO;
+import com.yry.blog.myblogauth.dto.UserRegisterDTO;
+import com.yry.blog.myblogauth.service.UserService;
+import com.yry.blog.myblogadmin.service.UserManageService;
 import com.yry.blog.myblogadmin.vo.UserAdminVO;
 import com.yry.blog.myblogcommon.annotation.RequiresPermission;
 import com.yry.blog.myblogcommon.auth.PermissionChecker;
@@ -25,6 +28,7 @@ import java.util.UUID;
 public class UserController {
 
     private final UserService userService;
+    private final UserManageService userManageService;
 
     @Autowired
     private PermissionChecker permissionChecker;
@@ -32,15 +36,16 @@ public class UserController {
     @Autowired
     private MinioService minioService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserManageService userManageService) {
         this.userService = userService;
+        this.userManageService = userManageService;
     }
 
     @RequiresPermission("user:view")
     @GetMapping
     public Response<PaginationResponse<UserAdminVO>> getUsers(
             @Validated UserQueryDTO queryDTO) {
-        return userService.pageUsers(queryDTO);
+        return userManageService.pageUsers(queryDTO);
     }
 
     @RequiresPermission("user:create")
@@ -53,13 +58,13 @@ public class UserController {
     @RequiresPermission("user:update")
     @PutMapping("/{id}")
     public Response<UserUpdateDTO> updateUser(@PathVariable Long id, @RequestBody UserUpdateDTO user) {
-        return userService.updateUser(id,user);
+        return userManageService.updateUser(id,user);
     }
 
     @RequiresPermission("user:delete")
     @DeleteMapping("/{id}")
     public Response<Object> deleteUser(@PathVariable Long id) {
-        return userService.deleteUser(id);
+        return userManageService.deleteUser(id);
     }
 
     @RequiresPermission("user:password")
@@ -68,7 +73,7 @@ public class UserController {
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestBody @Valid UserPasswordResetDTO passwordResetDTO) {
         String username = userDetails.getUsername();
-        return userService.resetPassword(username,
+        return userManageService.resetPassword(username,
                 passwordResetDTO.getOldPassword(),
                 passwordResetDTO.getNewPassword());
     }
@@ -79,7 +84,7 @@ public class UserController {
         if (userId == null) {
             return Response.error(ResponseCodeEnums.UNAUTHORIZED);
         }
-        return userService.getCurrentUser(userId);
+        return userManageService.getCurrentUser(userId);
     }
 
     @PostMapping("/me/avatar")
@@ -94,7 +99,7 @@ public class UserController {
         }
 
         try {
-            UserAdminVO currentUser = userService.getCurrentUser(userId).getData();
+            UserAdminVO currentUser = userManageService.getCurrentUser(userId).getData();
             String oldAvatarUrl = currentUser != null ? currentUser.getAvatarUrl() : null;
 
             String originalFilename = file.getOriginalFilename();
@@ -108,7 +113,7 @@ public class UserController {
             
             String avatarUrl = "/api/files/avatars/" + userId + "/" + filename;
             
-            Response<String> result = userService.updateAvatar(userId, avatarUrl);
+            Response<String> result = userManageService.updateAvatar(userId, avatarUrl);
 
             if (result.getData() != null && oldAvatarUrl != null && oldAvatarUrl.startsWith("/api/files/avatars/")) {
                 try {

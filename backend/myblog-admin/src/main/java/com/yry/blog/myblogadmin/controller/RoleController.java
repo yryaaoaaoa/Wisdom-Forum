@@ -1,9 +1,9 @@
 package com.yry.blog.myblogadmin.controller;
 
-import com.yry.blog.myblogadmin.dto.RoleCreateDTO;
-import com.yry.blog.myblogadmin.service.PermissionService;
-import com.yry.blog.myblogadmin.service.RoleService;
-import com.yry.blog.myblogadmin.vo.RoleVO;
+import com.yry.blog.myblogauth.dto.RoleCreateDTO;
+import com.yry.blog.myblogauth.service.PermissionService;
+import com.yry.blog.myblogauth.service.RoleService;
+import com.yry.blog.myblogauth.vo.RoleVO;
 import com.yry.blog.myblogcommon.annotation.RequiresPermission;
 import com.yry.blog.myblogcommon.entity.Permission.Permission;
 import com.yry.blog.myblogcommon.entity.Role.Role;

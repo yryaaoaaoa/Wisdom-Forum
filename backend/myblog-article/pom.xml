@@ -44,10 +44,6 @@
             <artifactId>myblog-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.yry.blog</groupId>
-            <artifactId>myblog-admin</artifactId>
-        </dependency>
-        <dependency>
             <groupId>co.elastic.clients</groupId>
             <artifactId>elasticsearch-java</artifactId>
         </dependency>

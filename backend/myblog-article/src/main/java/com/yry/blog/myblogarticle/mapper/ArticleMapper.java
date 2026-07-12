@@ -16,9 +16,7 @@ import org.apache.ibatis.annotations.Update;
 @Mapper
 public interface ArticleMapper extends BaseMapper<Article> {
 
-    IPage<ArticleVO> selectArticlePage(Page<PageVO> page, @Param("query") ArticleQueryDTO queryDTO);
-
-    @Select("SELECT " +
+@Select("SELECT " +
             "a.id, " +
             "a.auth_id AS authId, " +
             "u.nickname AS authName, " +

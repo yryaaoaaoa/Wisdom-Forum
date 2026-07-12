@@ -1,7 +1,7 @@
 package com.yry.blog.myblogadmin.mapper.mapstruct;
 
 import com.yry.blog.myblogadmin.vo.UserAdminVO;
-import com.yry.blog.myblogadmin.dto.UserRegisterDTO;
+import com.yry.blog.myblogauth.dto.UserRegisterDTO;
 import com.yry.blog.myblogadmin.dto.UserUpdateDTO;
 import com.yry.blog.myblogcommon.entity.user.User;
 import org.mapstruct.Mapper;

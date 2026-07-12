@@ -1,6 +1,6 @@
 package com.yry.blog.myblogwebsocket.config;
 
-import com.yry.blog.myblogadmin.jwt.JwtUtils;
+import com.yry.blog.myblogauth.jwt.JwtUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.Message;

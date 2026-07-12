@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.yry.blog.myblogadmin.auth.Impl.PermissionCheckerImpl;
+import com.yry.blog.myblogcommon.auth.PermissionChecker;
 import com.yry.blog.myblogarticle.dto.ArticleQueryDTO;
 import com.yry.blog.myblogarticle.dto.ArticleUpdateDTO;
 import com.yry.blog.myblogarticle.elasticsearch.ArticleDocument;
@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 @Service
 public class ArticleServiceImpl extends ServiceImpl<ArticleMapper, Article> implements ArticleService {
     @Autowired
-    private PermissionCheckerImpl permissionChecker;
+    private PermissionChecker permissionChecker;
     @Autowired
     private ArticleMapper articleMapper;
     @Autowired

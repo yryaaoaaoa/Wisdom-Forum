@@ -39,7 +39,11 @@
         </dependency>
         <dependency>
             <groupId>com.yry.blog</groupId>
-            <artifactId>myblog-admin</artifactId>
+            <artifactId>myblog-auth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
         </dependency>
     </dependencies>
 

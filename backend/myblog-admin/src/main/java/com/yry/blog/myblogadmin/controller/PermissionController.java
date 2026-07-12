@@ -3,7 +3,7 @@ package com.yry.blog.myblogadmin.controller;
 import com.yry.blog.myblogcommon.annotation.RequiresPermission;
 import com.yry.blog.myblogcommon.entity.Permission.Permission;
 import com.yry.blog.myblogcommon.result.Response;
-import com.yry.blog.myblogadmin.service.PermissionService;
+import com.yry.blog.myblogauth.service.PermissionService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
